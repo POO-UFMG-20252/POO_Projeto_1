@@ -3,6 +3,8 @@ import {createBrowserRouter, RouterProvider, Route, Outlet,} from "react-router-
 import Register from "./pages/Register"
 import Login from "./pages/Login"
 import Home from "./pages/Home"
+import Caixa from "./pages/Caixa"
+import Lista_Func from "./pages/Lista_Func"
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import "./style.scss"
@@ -37,8 +39,12 @@ const router = createBrowserRouter([
         element: <Login/>,
     },
     {
-        path: "/Home",
-        element: <Home/>,
+        path: "/caixa",
+        element: <Caixa/>,
+    },
+    {
+        path: "/funcionarios",
+        element: <Lista_Func/>,
     },
 ]);
 
