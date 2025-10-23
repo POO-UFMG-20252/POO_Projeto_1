@@ -378,5 +378,91 @@ $lightGreen : #b9e7e7;
                 padding: 8px;
             }
         }
+
+        /* Fundo principal */
+        body {
+            background: linear-gradient(to bottom right, #e4f7f4, #f2f9ef);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Container central */
+        .registro-container {
+            max-width: 600px;
+            margin: 80px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        /* Cabeçalho verde */
+        .registro-header {
+            background-color: #4caf50;
+            color: white;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            padding: 20px;
+        }
+
+        /* Área de conteúdo */
+        .registro-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        /* Botões principais */
+        .btn-registro {
+            display: inline-block;
+            padding: 14px 24px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 12px;
+            transition: all 0.2s ease;
+        }
+
+        /* Cores dos botões */
+        .btn-bater {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .btn-bater:hover {
+            background-color: #3d9142;
+        }
+
+        .btn-finalizar {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-finalizar:hover {
+            background-color: #c0392b;
+        }
+
+        /* Mensagem */
+        .mensagem {
+            background-color: #f4faef;
+            border-left: 5px solid #4caf50;
+            padding: 15px;
+            margin-top: 25px;
+            font-size: 1.05em;
+            display: inline-block;
+            text-align: left;
+        }
+
+        /* Hora */
+        .horario {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+
     }
 }
