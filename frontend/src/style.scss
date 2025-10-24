@@ -463,6 +463,119 @@ $lightGreen : #b9e7e7;
             font-weight: 500;
         }
 
+        // Página de Pedidos
 
+        .card {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            border-radius: 15px 15px 0 0 !important;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn {
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #198754 0%, #157347 100%);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #157347 0%, #0f5734 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0b5ed7 0%, #0954c0 100%);
+            transform: translateY(-2px);
+        }
+
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table th {
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            border-color: #f8f9fa;
+            vertical-align: middle;
+        }
+
+        .badge {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+        }
+
+        /* Animações suaves */
+        .adicionar-produto-section,
+        .lista-produtos-section {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Efeito hover na tabela */
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1.5rem !important;
+            }
+
+            .btn-lg {
+                padding: 0.75rem 1rem;
+            }
+
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
     }
 }
