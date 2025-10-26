@@ -8,7 +8,7 @@ class Produto():
 	#getters e setters nome
 	@property
 	def nome(self):
-		return self.nome
+		return self._nome
 	@nome.setter
 	def nome(self, nome_novo):
 		self._nome = nome_novo
@@ -16,7 +16,7 @@ class Produto():
 	#getters e setters marca
 	@property
 	def marca(self):
-		return self.marca
+		return self._marca
 	@marca.setter
 	def marca(self, marca_nova):
 		self._marca = marca_nova
@@ -24,7 +24,7 @@ class Produto():
 	#getter id
 	@property
 	def id(self):
-		return self.id
+		return self._id
 	
 	#setter id(opcional)
 	@id.setter
