@@ -15,5 +15,5 @@ class autenticador:
             cur = con.cursor()
             cur.execute("SELECT * from t_auth WHERE user=? AND password=?", (user, password))
             con.commit()
-            return cur.fetchone() is not None
+            return cur.fetchone() is not None#retorna true se bater e false se n
         
