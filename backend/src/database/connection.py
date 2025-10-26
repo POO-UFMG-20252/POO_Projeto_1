@@ -105,3 +105,11 @@ class DatabaseConnection:
                 FOREIGN KEY ("id_produto") REFERENCES "t_produto"("id")
                 ON UPDATE NO ACTION ON DELETE NO ACTION
                 );""")
+        
+        #t_auth - salva dados de login
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_auth" (
+                "id" INTEGER NOT NULL UNIQUE,
+                "user" TEXT NOT NULL,
+                "password" TEXT NOT NULL,
+                PRIMARY KEY("id"),
+                );""")
