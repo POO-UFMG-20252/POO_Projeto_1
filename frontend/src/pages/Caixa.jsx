@@ -54,16 +54,37 @@ const CadastroEventos = () => {
         setSearchTerm(e.target.value);
     };
 
-    const handleSelectEquipamento = (equipamento) => {
-        const novoEquipamento = {
-            ...equipamento,
-            uniqueId: Date.now() + Math.random()
-        };
+    const handleSelectEquipamento = (equipamentoSelecionado) => {
+  setEquipamentosSelecionados(prevEquipamentos => {
+    const existente = prevEquipamentos.find(
+      eq => eq.id === equipamentoSelecionado.id
+    );
 
-        setEquipamentosSelecionados(prev => [...prev, novoEquipamento]);
-        setSearchTerm('');
-        setShowSuggestions(false);
-    };
+    if (existente) {
+      // Se já existe, atualiza a quantidade
+      return prevEquipamentos.map(eq =>
+        eq.id === equipamentoSelecionado.id
+          ? { ...eq, quantidade: eq.quantidade + 1 }
+          : eq
+      );
+    } else {
+      // Se não existe, adiciona o novo
+      return [
+        ...prevEquipamentos,
+        {
+          ...equipamentoSelecionado,
+          quantidade: 1,
+          uniqueId: Date.now() // continua usando uniqueId se necessário
+        }
+      ];
+    }
+  });
+
+  // limpa pesquisa e sugestões
+  setSearchTerm("");
+  setShowSuggestions(false);
+};
+
 
     const handleRemoveEquipamento = (uniqueId) => {
         setEquipamentosSelecionados(prev =>
@@ -76,6 +97,8 @@ const CadastroEventos = () => {
         console.log('Evento ID:', operador.id);
         console.log('Equipamentos selecionados:', equipamentosSelecionados);
     };
+
+    
 
     return (
         <div className="container p-4">
