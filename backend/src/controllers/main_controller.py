@@ -1,5 +1,12 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from flask import Blueprint
 from controllers.produto_controller import ProdutoController
+
+main_bp = Blueprint('main', __name__)
+
+@main_bp.route('/')
+def home():
+    return {'message': 'API do Sistema de Estoque'}
 
 class MainController():
     def __init__(self):
@@ -40,3 +47,5 @@ class MainBaseHTTPRequestHandler(BaseHTTPRequestHandler):
     
     def carregar_controllers(self):
         self.controller_produtos = ProdutoController()
+
+        

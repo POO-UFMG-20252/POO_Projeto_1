@@ -1,115 +1,71 @@
 import sqlite3
+import os
+
 class DatabaseConnection:
     def __init__(self):
-        self.connection = sqlite3.connect("./resources/database.db")
-        self.cursor = self.connection.cursor()
+        # Caminho absoluto para o banco de dados
+        current_dir = os.path.dirname(__file__)
+        self.db_path = os.path.join(current_dir, 'estoque.db')
         
-    def configureDatabase(self):
-        # t_usuario - salva os dados dos usuarios
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_usuario" (
-                "id" VARCHAR NOT NULL UNIQUE,
-                "nome" VARCHAR NOT NULL,
-                "senha" VARCHAR NOT NULL,
-                "email" VARCHAR NOT NULL,
-                "data_nascimento" DATE NOT NULL,
-                "salario" REAL NOT NULL DEFAULT 0,
-                "tipo" INTEGER NOT NULL,
-                "ativo" BOOLEAN NOT NULL,
-                "id_supervisor" INTEGER NOT NULL,
-                "motivo_demissao" VARCHAR,
-                PRIMARY KEY("id")
-                );""")
-        
-        # t_ponto - salva os dados de ponto dos usuarios
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_ponto" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "id_usuario" VARCHAR NOT NULL,
-                "horario" DATETIME NOT NULL,
-                "tipo" INTEGER NOT NULL,
-                PRIMARY KEY("id"),
-                FOREIGN KEY ("id_usuario") REFERENCES "t_usuario"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION
-                );""")
-        
-        # t_mercado - salva os dados de um mercado
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_mercado" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "nome" INTEGER,
-                "capacidade" INTEGER,
-                "tam_armazem_x" INTEGER NOT NULL,
-                "tam_armazem_y" INTEGER NOT NULL,
-                "endereço" VARCHAR NOT NULL,
-                PRIMARY KEY("id")
-                );""")
-        
-        # t_estoque_mercado - salva os dados do estoque de um mercado
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_estoque_mercado" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "id_mercado" INTEGER NOT NULL,
-                "id_produto" INTEGER NOT NULL,
-                "quantidade" INTEGER NOT NULL,
-                PRIMARY KEY("id"),
-                FOREIGN KEY ("id_produto") REFERENCES "t_produto"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION,
-                FOREIGN KEY ("id_mercado") REFERENCES "t_mercado"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION
-                );""")
-        
-        # t_estoque_armazem - salvaos dados do estoque de um armazem
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_estoque_armazem" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "id_mercado" INTEGER NOT NULL,
-                "id_produto" INTEGER NOT NULL,
-                "pos_x" INTEGER NOT NULL,
-                "pos_y" INTEGER NOT NULL,
-                "quantidade" INTEGER NOT NULL,
-                PRIMARY KEY("id"),
-                FOREIGN KEY ("id_produto") REFERENCES "t_produto"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION,
-                FOREIGN KEY ("id_mercado") REFERENCES "t_mercado"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION
-                );""")
-        
-        # t_produto - salva os dados de um produto
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_produto" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "nome" VARCHAR NOT NULL,
-                "marca" VARCHAR NOT NULL,
-                PRIMARY KEY("id")
-                );""")
-        
-        self.cursor.execute("""INSERT INTO t_produto (id, nome, marca) VALUES (1, leite, itambe)""")
-        
-        # t_pedido - salva os dados de um pedido
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_pedido" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "id_responsavel" VARCHAR NOT NULL,
-                "id_mercado" INTEGER NOT NULL,
-                "estado" INTEGER NOT NULL,
-                PRIMARY KEY("id"),
-                FOREIGN KEY ("id_mercado") REFERENCES "t_mercado"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION,
-                FOREIGN KEY ("id_responsavel") REFERENCES "t_usuario"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION
-                );""")
-        
-        # t_pedido_produto - salva os dados dos produtos de um pedido
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_pedido_produto" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "id_pedido" INTEGER,
-                "id_produto" INTEGER NOT NULL,
-                "quantidade" INTEGER NOT NULL,
-                PRIMARY KEY("id"),
-                FOREIGN KEY ("id_pedido") REFERENCES "t_pedido"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION,
-                FOREIGN KEY ("id_produto") REFERENCES "t_produto"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION
-                );""")
-        
-        #t_auth - salva dados de login
-        self.cursor.execute("""CREATE TABLE IF NOT EXISTS "t_auth" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "user" TEXT NOT NULL,
-                "password" TEXT NOT NULL,
-                PRIMARY KEY("id"),
-                );""")
+    def get_connection(self):
+        """Retorna uma conexão com o banco de dados"""
+        try:
+            # Garantir que o diretório existe
+            os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+            
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            
+            # Verificar e criar tabela se não existir
+            self._verificar_tabela(conn)
+            
+            return conn
+        except sqlite3.Error as e:
+            print(f"❌ Erro ao conectar com o banco: {e}")
+            return None
+    
+    def _verificar_tabela(self, conn):
+        """Verifica se a tabela existe e cria se necessário"""
+        try:
+            cursor = conn.cursor()
+            
+            # Verificar se a tabela existe
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='estoque'")
+            if not cursor.fetchone():
+                print("📋 Criando tabela 'estoque'...")
+                cursor.execute('''
+                CREATE TABLE estoque (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL,
+                    quantidade INTEGER NOT NULL,
+                    localizacao TEXT NOT NULL,
+                    linha INTEGER NOT NULL,
+                    coluna INTEGER NOT NULL
+                )
+                ''')
+                
+                # Inserir dados iniciais
+                dados_iniciais = [
+                    ('Refrigerante Lata', 300, 'armazem', 0, 0),
+                    ('Água Mineral', 450, 'armazem', 0, 1),
+                    ('Suco Natural', 200, 'armazem', 1, 2),
+                    ('Energético', 480, 'armazem', 2, 1),
+                    ('Chá Gelado', 150, 'armazem', 3, 3),
+                    ('Refrigerante 2L', 350, 'loja', 0, 0),
+                    ('Cerveja', 500, 'loja', 1, 1),
+                    ('Água com Gás', 280, 'loja', 2, 2)
+                ]
+                
+                cursor.executemany('''
+                INSERT INTO estoque (nome, quantidade, localizacao, linha, coluna)
+                VALUES (?, ?, ?, ?, ?)
+                ''', dados_iniciais)
+                
+                conn.commit()
+                print(f"✅ Tabela criada e {len(dados_iniciais)} registros inseridos!")
+            else:
+                print("✅ Tabela 'estoque' verificada!")
+                
+        except Exception as e:
+            print(f"❌ Erro ao verificar tabela: {e}")
+            conn.rollback()

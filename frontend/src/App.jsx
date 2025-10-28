@@ -7,6 +7,7 @@ import Caixa from "./pages/Caixa"
 import Ponto from "./pages/Ponto"
 import Pedido from "./pages/Pedido"
 import Estoque from "./pages/Estoque"
+import Teste from "./pages/Teste"
 import Lista_Func from "./pages/Lista_Func"
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
             {
                 path: "/estoque",
                 element: <Estoque />,
+            },
+            {
+                path: "/teste",
+                element: <Teste />,
             }
         ]
     },

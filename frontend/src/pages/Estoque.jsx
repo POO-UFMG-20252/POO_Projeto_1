@@ -7,27 +7,40 @@ const EstoqueVisualizacao = () => {
   const [produtos, setProdutos] = useState([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [modoMovimento, setModoMovimento] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Configurações
   const [tamanhoArmazem, setTamanhoArmazem] = useState({ linhas: 5, colunas: 5 });
   const [tamanhoLoja, setTamanhoLoja] = useState({ linhas: 3, colunas: 3 });
   const [capacidadeMaxima, setCapacidadeMaxima] = useState(500);
 
-  // Simulação de produtos do backend
-  const simularProdutosBackend = () => {
-    const produtosMock = [
-      { id: 1, nome: "Refrigerante Lata", quantidade: 300, localizacao: 'armazem', posicao: { linha: 0, coluna: 0 } },
-      { id: 2, nome: "Água Mineral", quantidade: 450, localizacao: 'armazem', posicao: { linha: 0, coluna: 1 } },
-      { id: 3, nome: "Suco Natural", quantidade: 200, localizacao: 'armazem', posicao: { linha: 1, coluna: 2 } },
-      { id: 4, nome: "Energético", quantidade: 480, localizacao: 'armazem', posicao: { linha: 2, coluna: 1 } },
-      { id: 5, nome: "Chá Gelado", quantidade: 150, localizacao: 'armazem', posicao: { linha: 3, coluna: 3 } },
-      { id: 6, nome: "Refrigerante 2L", quantidade: 350, localizacao: 'loja', posicao: { linha: 0, coluna: 0 } },
-      { id: 7, nome: "Cerveja", quantidade: 500, localizacao: 'loja', posicao: { linha: 1, coluna: 1 } },
-      { id: 8, nome: "Água com Gás", quantidade: 280, localizacao: 'loja', posicao: { linha: 2, coluna: 2 } }
-    ];
-    
-    setProdutos(produtosMock);
-    return produtosMock;
+  // Função para buscar produtos do backend
+  const buscarProdutosBackend = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('🔍 Buscando dados do backend...');
+      const response = await fetch('http://localhost:5000/api/estoque');
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
+      
+      const dadosBackend = await response.json();
+      console.log('✅ Dados recebidos do backend:', dadosBackend);
+      
+      setProdutos(dadosBackend);
+      return dadosBackend;
+      
+    } catch (error) {
+      console.error('❌ Erro ao buscar dados do backend:', error);
+      setError('Erro ao carregar dados do estoque. Verifique se o servidor está rodando.');
+      return [];
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Função para inicializar matriz vazia
@@ -42,6 +55,7 @@ const EstoqueVisualizacao = () => {
           linha: i,
           coluna: j,
           produto: null,
+          produtoId: null,
           ocupada: false,
           tipo: tipo
         });
@@ -53,11 +67,13 @@ const EstoqueVisualizacao = () => {
 
   // Função para mapear produtos para as matrizes
   const mapearProdutosParaMatrizes = (produtosList) => {
+    console.log('🗺️ Mapeando produtos para matrizes:', produtosList);
+    
     // Inicializar matrizes vazias
     const novaMatrizArmazem = inicializarMatrizVazia(tamanhoArmazem.linhas, tamanhoArmazem.colunas, 'armazem');
     const novaMatrizLoja = inicializarMatrizVazia(tamanhoLoja.linhas, tamanhoLoja.colunas, 'loja');
 
-    // Preencher matrizes com produtos
+    // Preencher matrizes com produtos do backend
     produtosList.forEach(produto => {
       const { linha, coluna } = produto.posicao;
       const porcentagem = (produto.quantidade / capacidadeMaxima) * 100;
@@ -75,17 +91,27 @@ const EstoqueVisualizacao = () => {
 
       if (produto.localizacao === 'armazem' && linha < tamanhoArmazem.linhas && coluna < tamanhoArmazem.colunas) {
         novaMatrizArmazem[linha][coluna] = celula;
+        console.log(`📍 Produto ${produto.nome} mapeado para armazém [${linha},${coluna}]`);
       } else if (produto.localizacao === 'loja' && linha < tamanhoLoja.linhas && coluna < tamanhoLoja.colunas) {
         novaMatrizLoja[linha][coluna] = celula;
+        console.log(`📍 Produto ${produto.nome} mapeado para loja [${linha},${coluna}]`);
+      } else {
+        console.warn(`⚠️ Produto ${produto.nome} fora dos limites da matriz:`, produto);
       }
     });
 
     setMatrizArmazem(novaMatrizArmazem);
     setMatrizLoja(novaMatrizLoja);
+    
+    console.log('✅ Matrizes atualizadas:', {
+      armazem: `${novaMatrizArmazem.length}x${novaMatrizArmazem[0]?.length || 0}`,
+      loja: `${novaMatrizLoja.length}x${novaMatrizLoja[0]?.length || 0}`,
+      produtosMapeados: produtosList.length
+    });
   };
 
-  // Função para adicionar produto aleatório no armazém
-  const adicionarProdutoAleatorio = () => {
+  // Função para adicionar produto (agora enviaria para o backend)
+  const adicionarProdutoAleatorio = async () => {
     const nomesProdutos = [
       "Refrigerante Lata", "Água Mineral", "Suco Natural", "Energético", 
       "Chá Gelado", "Refrigerante 2L", "Cerveja", "Água com Gás", 
@@ -107,27 +133,42 @@ const EstoqueVisualizacao = () => {
     }
 
     const novoProduto = {
-      id: Date.now(),
       nome: nomesProdutos[Math.floor(Math.random() * nomesProdutos.length)],
       quantidade: Math.floor(Math.random() * capacidadeMaxima) + 1,
       localizacao: 'armazem',
-      posicao: { linha, coluna }
+      linha: linha,
+      coluna: coluna
     };
 
-    const novosProdutos = [...produtos, novoProduto];
+    // Aqui você faria uma requisição POST para o backend
+    console.log('📤 Simulando envio para backend:', novoProduto);
+    
+    // Por enquanto, apenas atualiza o estado local
+    const produtoComId = {
+      ...novoProduto,
+      id: Date.now(), // ID temporário
+      posicao: { linha, coluna }
+    };
+    
+    const novosProdutos = [...produtos, produtoComId];
     setProdutos(novosProdutos);
     mapearProdutosParaMatrizes(novosProdutos);
   };
 
-  // Função para mover produto entre matrizes
+  // Função para mover produto (também enviaria para o backend)
   const moverProduto = (produtoId, novaLocalizacao, novaPosicao) => {
     const novosProdutos = produtos.map(produto => {
       if (produto.id === produtoId) {
-        return {
+        const produtoAtualizado = {
           ...produto,
           localizacao: novaLocalizacao,
           posicao: novaPosicao
         };
+        
+        // Aqui você faria uma requisição PUT para o backend
+        console.log('📤 Simulando atualização no backend:', produtoAtualizado);
+        
+        return produtoAtualizado;
       }
       return produto;
     });
@@ -167,8 +208,11 @@ const EstoqueVisualizacao = () => {
     moverProduto(produtoSelecionado.id, tipoMatriz, { linha, coluna });
   };
 
-  // Função para remover produto
+  // Função para remover produto (também enviaria para o backend)
   const removerProduto = (produtoId) => {
+    // Aqui você faria uma requisição DELETE para o backend
+    console.log('🗑️ Simulando remoção no backend do produto:', produtoId);
+    
     const novosProdutos = produtos.filter(produto => produto.id !== produtoId);
     setProdutos(novosProdutos);
     mapearProdutosParaMatrizes(novosProdutos);
@@ -176,16 +220,28 @@ const EstoqueVisualizacao = () => {
     setModoMovimento(false);
   };
 
-  // Inicializar quando o componente montar
+  // Carregar dados do backend quando o componente montar
   useEffect(() => {
-    const produtosIniciais = simularProdutosBackend();
-    mapearProdutosParaMatrizes(produtosIniciais);
+    const carregarDados = async () => {
+      const produtosBackend = await buscarProdutosBackend();
+      mapearProdutosParaMatrizes(produtosBackend);
+    };
+    
+    carregarDados();
   }, []);
 
   // Atualizar matrizes quando configurações mudarem
   useEffect(() => {
-    mapearProdutosParaMatrizes(produtos);
+    if (produtos.length > 0) {
+      mapearProdutosParaMatrizes(produtos);
+    }
   }, [tamanhoArmazem, tamanhoLoja, capacidadeMaxima]);
+
+  // Função para recarregar dados
+  const recarregarDados = async () => {
+    const produtosBackend = await buscarProdutosBackend();
+    mapearProdutosParaMatrizes(produtosBackend);
+  };
 
   // Função para determinar a cor baseada na porcentagem
   const getCorPorPorcentagem = (porcentagem, ocupada, tipo) => {
@@ -263,9 +319,44 @@ const EstoqueVisualizacao = () => {
     );
   };
 
+  // Estados de loading e error
+  if (loading) {
+    return (
+      <div className="estoque-container">
+        <div className="loading-estoque">
+          <h1>Gestão de Estoque - Armazém e Loja</h1>
+          <div className="spinner-container">
+            <div className="spinner"></div>
+            <p>Carregando dados do estoque...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="estoque-container">
+        <h1>Gestão de Estoque - Armazém e Loja</h1>
+        <div className="error-container">
+          <h3>❌ Erro ao carregar dados</h3>
+          <p>{error}</p>
+          <button onClick={recarregarDados} className="btn-recarregar">
+            🔄 Tentar Novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="estoque-container">
-      <h1>Gestão de Estoque - Armazém e Loja</h1>
+      <div className="header-com-botoes">
+        <h1>Gestão de Estoque - Armazém e Loja</h1>
+        <button onClick={recarregarDados} className="btn-recarregar">
+          🔄 Atualizar Dados
+        </button>
+      </div>
       
       {/* Modo Movimento */}
       {modoMovimento && produtoSelecionado && (
@@ -406,6 +497,9 @@ const EstoqueVisualizacao = () => {
           <strong>Capacidade por célula:</strong> {capacidadeMaxima} unidades | 
           <strong> Armazém:</strong> {tamanhoArmazem.linhas}×{tamanhoArmazem.colunas} | 
           <strong> Loja:</strong> {tamanhoLoja.linhas}×{tamanhoLoja.colunas}
+        </p>
+        <p className="backend-info">
+          <strong>🔗 Conectado ao Backend:</strong> Dados carregados do servidor Flask
         </p>
       </div>
     </div>
