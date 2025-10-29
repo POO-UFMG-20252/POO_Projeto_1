@@ -66,38 +66,6 @@ class DatabaseConnection:
             else:
                 print("✅ Tabela 'estoque' verificada!")
                 
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'")
-            if not cursor.fetchone():
-                print("📋 Criando tabela 'usuarios'...")
-                cursor.execute('''
-                CREATE TABLE usuarios (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-	            nome TEXT UNIQUE NOT NULL,
-                cpf TEXT UNIQUE NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                senha TEXT NOT NULL,
-                cargo INTEGER NOT NULL, -- 0: Gerente, 1: Repositor, 2: Caixa
-                ativo BOOLEAN DEFAULT 1,
-                data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-                ''')
-                
-                # Inserir usuário padrão
-                cursor.execute('''
-                INSERT INTO usuarios (cpf, nome, email, senha, cargo) VALUES 
-                ('11111111111', 'Gabriela', 'gerente1@email.com', 'senha123', 0),
-                ('22222222222', 'Jaime','gerente2@email.com', 'senha123', 0),
-                ('33333333333', 'Lucas' ,'repositor1@email.com', 'senha123', 1),
-                ('44444444444', 'Luigi' ,'repositor2@email.com', 'senha123', 1),
-                ('55555555555', 'Artur' ,'caixa1@email.com', 'senha123', 2),
-                ('66666666666', 'Gil' ,'caixa2@email.com', 'senha123', 2);
-                ''')
-                
-                conn.commit()
-                print("✅ Tabela 'usuarios' criada e usuário padrão inserido!")
-            else:
-                print("✅ Tabela 'usuarios' verificada!")
-                
         except Exception as e:
             print(f"❌ Erro ao verificar tabela: {e}")
             conn.rollback()

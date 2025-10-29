@@ -20,11 +20,9 @@ def create_app():
     try:
         from controllers.main_controller import main_bp
         from controllers.estoque_controller import estoque_bp
-        from controllers.login_controller import login_bp
         
         app.register_blueprint(main_bp)
         app.register_blueprint(estoque_bp)
-        app.register_blueprint(login_bp)
         print("✅ Blueprints registrados com sucesso!")
         
     except ImportError as e:
