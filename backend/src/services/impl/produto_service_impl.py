@@ -9,45 +9,43 @@ class ProdutoServiceImpl(ProdutoService):
 
     @staticmethod
     def adicionar_produto(self,id: int, nome: str, marca: str):
-        with sqlite3.connect(self.banco_de_dados) as con:
-            cur = con.cursor()
-            cur.execute("INSERT INTO t_produto (id,nome,marca) VALUES (?, ?,?)", (id,nome,marca,))
-            con.commit()
+        conexao_db = self.banco_de_dados.get_connection()
+        cursor = conexao_db.cursor()
+        cursor.execute("INSERT INTO t_produto (id,nome,marca) VALUES (?, ?,?)", (id,nome,marca,))
+        conexao_db.close()
     
     @staticmethod
     def remover_produto(self,id: int):
-        with sqlite3.connect(self.banco_de_dados) as con:
-            cur = con.cursor()
-            cur.execute("DELETE FROM t_produto WHERE id =?",(id,))
+        conexao_db = self.banco_de_dados.get_connection()
+        cursor = conexao_db.cursor()
+        cursor.execute("DELETE FROM t_produto WHERE id =?",(id,))
+        conexao_db.close()
 
     @staticmethod
     def editar_produto(self,id: int, nome:str, marca:str):
-        with sqlite3.connect(self.banco_de_dados) as con:
-            cur = con.cursor()
-            cur.execute("UPDATE t_produto SET nome = ? marca = ? WHERE id = ?",(nome,marca,id),)
+        conexao_db = self.banco_de_dados.get_connection()
+        cursor = conexao_db.cursor()
+        cursor.execute("UPDATE t_produto SET nome = ? marca = ? WHERE id = ?",(nome,marca,id),)
+        conexao_db.close()
 
     @staticmethod
     def busca_geral_produto(self):
         produtos = [] #array final/geral
-        try:
-            with sqlite3.connect(self.banco_de_dados) as con:
-                cur = con.cursor()
-                cur.execute("SELECT id,nome,marca FROM t_produto ")
-                results = cur.fetchall()#pega todos os produtos
-                for result in results:
-                    produto = Produto(*result)
-                    produtos.append(produto)#pega cada item do fetchall e salva como um objeto na lista produtos
-            return produtos
-        except:
-            return []#retorna lista vazia caso de erro
+
+        conexao_db = self.banco_de_dados.get_connection()
+        cursor = conexao_db.cursor()
+        cursor.execute("SELECT id,nome,marca FROM t_produto ")
+        results = cursor.fetchall()#pega todos os produtos
+        for result in results:
+            produto = Produto(*result)
+            produtos.append(produto)#pega cada item do fetchall e salva como um objeto na lista produtos
+        return produtos
+        conexao_db.close()
     
     @staticmethod
     def busca_produto(self, id: int):
-        try:
-            with sqlite3.connect(self.banco_de_dados) as con:
-                cur = con.cursor()
-                cur.execute("SELECT id,nome,marca FROM t_produto WHERE id =?",(id,))
-                result = cur.fetchone()
-                return result
-        except:
-            return None
+        conexao_db = self.banco_de_dados.get_connection()
+        cursor = conexao_db.cursor()
+        cursor.execute("SELECT id,nome,marca FROM t_produto WHERE id =?",(id,))
+        result = cursor.fetchone()
+        return result
