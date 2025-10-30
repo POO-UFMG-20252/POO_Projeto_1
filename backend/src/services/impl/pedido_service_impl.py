@@ -16,7 +16,7 @@ class PedidoServiceImpl(PedidoService):
         conexao_db.close()
 
     @staticmethod
-    def editar_pedido(self,id:int, estado:str):
+    def editar_pedido(self,id:int, estado:int):
         conexao_db = self.banco_de_dados.get_connection()
         cursor = conexao_db.cursor()
         cursor.execute("UPDATE t_pedido SET estado = ? WHERE id = ?",(estado,id,))

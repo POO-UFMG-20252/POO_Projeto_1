@@ -6,7 +6,7 @@ class PedidoService:
         pass
 
     @abstractmethod
-    def editar_pedido(id:int, estado:str,):
+    def editar_pedido(id:int, estado:int):
         pass
 
     @abstractmethod
