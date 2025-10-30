@@ -1,5 +1,3 @@
-import sqlite3
-DB_NAME = "database.db"
 class Produto():
 	def __init__(self, id, nome, marca):
 		self.id = id
