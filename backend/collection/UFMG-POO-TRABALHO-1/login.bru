@@ -1,0 +1,23 @@
+meta {
+  name: login
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5000/autenticacao/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "cpf":"12345678900",
+    "senha":"senhafoda"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

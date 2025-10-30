@@ -5,5 +5,5 @@ class AutenticacaoService():
     def cadastro():
         pass
     @abstractmethod
-    def login():
+    def login(self, cpf: str, senha: str):
         pass

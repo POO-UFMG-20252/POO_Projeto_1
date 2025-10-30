@@ -1,5 +1,4 @@
 from flask import Flask
-from controllers.produto_controller import ProdutoController
 
 class MainApp:
     def __init__(self, controllers):

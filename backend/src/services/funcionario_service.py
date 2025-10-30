@@ -2,11 +2,13 @@ from abc import abstractmethod
 
 class FuncionarioService:
     @abstractmethod
-    def login():
+    def cadastrar_funcionario(self, cpf: str):
         pass
+    
     @abstractmethod
-    def cadastro():
+    def buscar_funcionario(self, cpf: str):
         pass
+    
     @abstractmethod
-    def demitir():
+    def demitir(self, cpf_gerente: str, cpf_funcionario: str):
         pass

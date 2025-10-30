@@ -1,6 +1,7 @@
 from database.connection import DatabaseConnection
 
-from services.autenticacao_service import AutenticacaoService
+from services.impl.autenticacao_service_impl import AutenticacaoServiceImpl
+from services.impl.funcionario_service_impl import FuncionarioServiceImpl
 
 from controllers.main_app import MainApp
 from controllers.autenticacao_controller import AutenticacaoController
@@ -8,7 +9,8 @@ from controllers.autenticacao_controller import AutenticacaoController
 def main():
     conexaoBancoDeDados = DatabaseConnection()
 
-    autenticacaoService = AutenticacaoService(conexaoBancoDeDados)
+    funcionarioService = FuncionarioServiceImpl(conexaoBancoDeDados)
+    autenticacaoService = AutenticacaoServiceImpl(funcionarioService)
     
     autenticacaoController = AutenticacaoController(autenticacaoService)
     
@@ -18,3 +20,5 @@ def main():
     
     app = MainApp(controllers)
     app.run()
+    
+main()
