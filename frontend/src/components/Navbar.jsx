@@ -41,7 +41,7 @@ const Navbar = () => {
             <h6>Produtos</h6>
           </Link>
           
-          <Link className='nav-link' to="/pedidos">
+          <Link className='nav-link' to="/lista_pedidos">
             <div className='nav-icon'>📋</div>
             <h6>Pedidos</h6>
           </Link>
