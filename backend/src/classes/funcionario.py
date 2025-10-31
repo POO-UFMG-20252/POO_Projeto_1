@@ -1,17 +1,20 @@
 from datetime import date
 
 class Funcionario:
-    def __init__(self, cpf: str, nome: str, senha: str, email: str, data_nascimento: date, salario: float, tipo: int, ativo: bool, id_supervisor: int = None, motivo_demissao: str = None):
-        self._cpf = cpf
-        self._nome = nome
-        self._senha = senha
-        self._email = email
-        self._data_nascimento = data_nascimento
-        self._salario = salario
-        self._tipo = tipo
-        self._ativo = ativo
-        self._id_supervisor = id_supervisor
-        self._motivo_demissao = motivo_demissao
+    def __init__(self, cpf: str, nome: str, data_admissao: str, 
+                 email: str = "", senha: str = "", data_nascimento: str = "",
+                 salario: float = 0, tipo: int = 0, ativo: bool = True, 
+                 id_supervisor: int = 0):
+        self.cpf = cpf
+        self.nome = nome
+        self.data_admissao = data_admissao
+        self.email = email
+        self.senha = senha
+        self.data_nascimento = data_nascimento
+        self.salario = salario
+        self.tipo = tipo
+        self.ativo = ativo
+        self.id_supervisor = id_supervisor
 
     @property
     def cpf(self):
@@ -54,6 +57,14 @@ class Funcionario:
         self._data_nascimento = valor
 
     @property
+    def data_admissao(self):
+        return self._data_admissao
+
+    @data_admissao.setter
+    def data_admissao(self, valor):
+        self._data_admissao = valor
+
+    @property
     def salario(self):
         return self._salario
 
@@ -92,3 +103,26 @@ class Funcionario:
     @motivo_demissao.setter
     def motivo_demissao(self, valor):
         self._motivo_demissao = valor
+
+    def to_dict(self):
+        return {
+            'cpf': self.cpf,
+            'nome': self.nome,
+            'data_admissao': self.data_admissao
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict):
+        """Método alternativo para criar Funcionario a partir de um dicionário"""
+        return cls(
+            cpf=data.get('cpf', ''),
+            nome=data.get('nome', ''),
+            data_admissao=data.get('data_admissao', ''),
+            email=data.get('email', ''),
+            senha=data.get('senha', ''),
+            data_nascimento=data.get('data_nascimento', ''),
+            salario=data.get('salario', 0),
+            tipo=data.get('tipo', 0),
+            ativo=data.get('ativo', True),
+            id_supervisor=data.get('id_supervisor', 0)
+        )

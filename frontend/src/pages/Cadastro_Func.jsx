@@ -12,13 +12,13 @@ const CadastroFuncionario = () => {
 
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const tiposFuncionario = [
     { value: '', label: 'Selecione o tipo' },
-    { value: 'CLT', label: 'CLT' },
-    { value: 'PJ', label: 'PJ' },
-    { value: 'Estagiário', label: 'Estagiário' },
-    { value: 'Freelancer', label: 'Freelancer' }
+    { value: 'Gerente', label: 'Gerente' },
+    { value: 'Caixa', label: 'Caixa' },
+    { value: 'Repositor', label: 'Repositor' },
   ];
 
   const handleChange = (e) => {
@@ -93,8 +93,6 @@ const CadastroFuncionario = () => {
     // Verifica se todos os dígitos são iguais
     if (/^(\d)\1+$/.test(cpf)) return false;
     
-    // Aqui você pode implementar a validação completa do CPF
-    // Por simplicidade, vou retornar true para CPFs com 11 dígitos
     return true;
   };
 
@@ -134,28 +132,64 @@ const CadastroFuncionario = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     const formErrors = validateForm();
     
     if (Object.keys(formErrors).length === 0) {
-      // Formulário válido - aqui você pode enviar os dados para a API
-      console.log('Dados do funcionário:', formData);
-      setSubmitted(true);
+      setLoading(true);
       
-      // Limpa o formulário após 3 segundos
-      setTimeout(() => {
-        setFormData({
-          nome: '',
-          cpf: '',
-          email: '',
-          dataNascimento: '',
-          salario: '',
-          tipoFuncionario: ''
+      try {
+        // Preparar dados para a API
+        const dadosParaAPI = {
+          nome: formData.nome.trim(),
+          cpf: formData.cpf.replace(/\D/g, ''), // Remove formatação
+          email: formData.email.trim(),
+          data_nascimento: formData.dataNascimento,
+          salario: parseFloat(formData.salario),
+          tipo: formData.tipoFuncionario
+        };
+
+        console.log('Enviando dados para API:', dadosParaAPI);
+
+        // Fazer requisição para a API
+        const response = await fetch('http://localhost:5000/funcionarios', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dadosParaAPI)
         });
-        setSubmitted(false);
-      }, 3000);
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Erro ao cadastrar funcionário');
+        }
+
+        console.log('Resposta da API:', data);
+        setSubmitted(true);
+        
+        // Limpa o formulário após 3 segundos
+        setTimeout(() => {
+          setFormData({
+            nome: '',
+            cpf: '',
+            email: '',
+            dataNascimento: '',
+            salario: '',
+            tipoFuncionario: ''
+          });
+          setSubmitted(false);
+        }, 3000);
+
+      } catch (error) {
+        console.error('Erro ao cadastrar funcionário:', error);
+        setErrors({ submit: error.message });
+      } finally {
+        setLoading(false);
+      }
     } else {
       setErrors(formErrors);
     }
@@ -174,6 +208,12 @@ const CadastroFuncionario = () => {
         </div>
       )}
 
+      {errors.submit && (
+        <div className="error-message-global">
+          ❌ {errors.submit}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="cadastro-form">
         <div className="form-row">
           <div className="form-group">
@@ -186,6 +226,7 @@ const CadastroFuncionario = () => {
               onChange={handleChange}
               className={errors.nome ? 'error' : ''}
               placeholder="Digite o nome completo"
+              disabled={loading}
             />
             {errors.nome && <span className="error-message">{errors.nome}</span>}
           </div>
@@ -201,6 +242,7 @@ const CadastroFuncionario = () => {
               className={errors.cpf ? 'error' : ''}
               placeholder="000.000.000-00"
               maxLength="14"
+              disabled={loading}
             />
             {errors.cpf && <span className="error-message">{errors.cpf}</span>}
           </div>
@@ -217,6 +259,7 @@ const CadastroFuncionario = () => {
               onChange={handleChange}
               className={errors.email ? 'error' : ''}
               placeholder="exemplo@empresa.com"
+              disabled={loading}
             />
             {errors.email && <span className="error-message">{errors.email}</span>}
           </div>
@@ -230,6 +273,7 @@ const CadastroFuncionario = () => {
               value={formData.dataNascimento}
               onChange={handleChange}
               className={errors.dataNascimento ? 'error' : ''}
+              disabled={loading}
             />
             {errors.dataNascimento && <span className="error-message">{errors.dataNascimento}</span>}
           </div>
@@ -248,6 +292,7 @@ const CadastroFuncionario = () => {
               placeholder="0.00"
               step="0.01"
               min="0"
+              disabled={loading}
             />
             {errors.salario && <span className="error-message">{errors.salario}</span>}
           </div>
@@ -260,6 +305,7 @@ const CadastroFuncionario = () => {
               value={formData.tipoFuncionario}
               onChange={handleChange}
               className={errors.tipoFuncionario ? 'error' : ''}
+              disabled={loading}
             >
               {tiposFuncionario.map((tipo) => (
                 <option key={tipo.value} value={tipo.value}>
@@ -272,8 +318,12 @@ const CadastroFuncionario = () => {
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="submit-btn">
-            Cadastrar Funcionário
+          <button 
+            type="submit" 
+            className="submit-btn"
+            disabled={loading}
+          >
+            {loading ? 'Cadastrando...' : 'Cadastrar Funcionário'}
           </button>
           <button 
             type="button" 
@@ -289,11 +339,142 @@ const CadastroFuncionario = () => {
               });
               setErrors({});
             }}
+            disabled={loading}
           >
             Limpar Campos
           </button>
         </div>
       </form>
+
+      <style jsx>{`
+        .cadastro-container {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        
+        .cadastro-header {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+        
+        .cadastro-header h1 {
+          color: #333;
+          margin-bottom: 10px;
+        }
+        
+        .cadastro-header p {
+          color: #666;
+        }
+        
+        .success-message {
+          background-color: #d4edda;
+          color: #155724;
+          padding: 12px;
+          border-radius: 4px;
+          margin-bottom: 20px;
+          text-align: center;
+          font-weight: bold;
+        }
+        
+        .error-message-global {
+          background-color: #f8d7da;
+          color: #721c24;
+          padding: 12px;
+          border-radius: 4px;
+          margin-bottom: 20px;
+          text-align: center;
+          font-weight: bold;
+        }
+        
+        .cadastro-form {
+          background: white;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-row {
+          display: flex;
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+        
+        .form-group {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        label {
+          margin-bottom: 5px;
+          font-weight: 600;
+          color: #333;
+        }
+        
+        input, select {
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 14px;
+        }
+        
+        input.error, select.error {
+          border-color: #dc3545;
+        }
+        
+        .error-message {
+          color: #dc3545;
+          font-size: 12px;
+          margin-top: 5px;
+        }
+        
+        .form-actions {
+          display: flex;
+          gap: 15px;
+          justify-content: flex-end;
+          margin-top: 30px;
+        }
+        
+        .submit-btn {
+          background-color: #007bff;
+          color: white;
+          border: none;
+          padding: 12px 30px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: 600;
+        }
+        
+        .submit-btn:disabled {
+          background-color: #6c757d;
+          cursor: not-allowed;
+        }
+        
+        .submit-btn:hover:not(:disabled) {
+          background-color: #0056b3;
+        }
+        
+        .clear-btn {
+          background-color: #6c757d;
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        
+        .clear-btn:hover:not(:disabled) {
+          background-color: #545b62;
+        }
+        
+        @media (max-width: 768px) {
+          .form-row {
+            flex-direction: column;
+            gap: 15px;
+          }
+        }
+      `}</style>
     </div>
   );
 };

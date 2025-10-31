@@ -1,29 +1,43 @@
 import React, { useState, useEffect } from 'react';
 
 const EventosLista = () => {
-    const [eventos, setEventos] = useState([]);
+    const [funcionarios, setFuncionarios] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Simulando carregamento dos dados (substitua pela sua API real)
+    // Carregar funcionários da API real
     useEffect(() => {
-        const carregarEventos = async () => {
+        const carregarFuncionarios = async () => {
             try {
-                // Exemplo de dados - substitua pela sua chamada API
-                const dadosEventos = [
-                    { id: 1, nome: "João Silva", local: "São Paulo", endereco: "Rua A, 123", dt_inicio: "2024-01-01", dt_fim: "2024-01-02" },
-                    { id: 2, nome: "Maria Santos", local: "Rio de Janeiro", endereco: "Av B, 456", dt_inicio: "2024-01-03", dt_fim: "2024-01-04" },
-                    { id: 3, nome: "Pedro Oliveira", local: "Belo Horizonte", endereco: "Rua C, 789", dt_inicio: "2024-01-05", dt_fim: "2024-01-06" }
-                ];
+                setLoading(true);
+                setError(null);
                 
-                setEventos(dadosEventos);
-                setLoading(false);
+                // Substitua pela URL da sua API
+                const response = await fetch('http://localhost:5000/funcionarios', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Se precisar de autenticação, adicione o token
+                        // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                }
+
+                const dadosFuncionarios = await response.json();
+                setFuncionarios(dadosFuncionarios);
+                
             } catch (error) {
-                console.error('Erro ao carregar eventos:', error);
+                console.error('Erro ao carregar funcionários:', error);
+                setError('Erro ao carregar lista de funcionários. Tente novamente.');
+            } finally {
                 setLoading(false);
             }
         };
 
-        carregarEventos();
+        carregarFuncionarios();
     }, []);
 
     const goBack = () => {
@@ -36,14 +50,83 @@ const EventosLista = () => {
     };
 
     const irParaCadastro = () => {
-        // Redirecionamento simples sem React Router
         window.location.href = '/cadastro_func';
-        // Ou se estiver usando HashRouter:
-        // window.location.hash = '#/cadastro_func';
+    };
+
+    // Função para formatar a data no formato brasileiro
+    const formatarData = (dataString) => {
+        if (!dataString) return '-';
+        try {
+            const data = new Date(dataString);
+            return data.toLocaleDateString('pt-BR');
+        } catch {
+            return dataString;
+        }
     };
 
     if (loading) {
-        return <div className="loading">Carregando...</div>;
+        return (
+            <div className="eventos-lista-container">
+                <div className="loading-container">
+                    <div className="loading">Carregando funcionários...</div>
+                </div>
+                <style jsx>{`
+                    .loading-container {
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 200px;
+                    }
+                    .loading {
+                        text-align: center;
+                        font-size: 18px;
+                        color: #666;
+                    }
+                `}</style>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="eventos-lista-container">
+                <div className="error-container">
+                    <div className="error-message">{error}</div>
+                    <button 
+                        className="btn-retry"
+                        onClick={() => window.location.reload()}
+                    >
+                        Tentar Novamente
+                    </button>
+                </div>
+                <style jsx>{`
+                    .error-container {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        height: 200px;
+                        gap: 20px;
+                    }
+                    .error-message {
+                        color: #dc3545;
+                        font-size: 16px;
+                        text-align: center;
+                    }
+                    .btn-retry {
+                        background-color: #007bff;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                    }
+                    .btn-retry:hover {
+                        background-color: #0056b3;
+                    }
+                `}</style>
+            </div>
+        );
     }
 
     return (
@@ -51,6 +134,9 @@ const EventosLista = () => {
             <div className="boxH1ResPadraoDesktop">
                 <div className="mesPremiadoPadraoDesktop">
                     <h1 className="h1ResPadraoDesktop">Lista de Funcionários</h1>
+                    <div className="total-funcionarios">
+                        Total: {funcionarios.length} funcionário(s)
+                    </div>
                 </div>
                 <div className="botoes-header">
                     <button 
@@ -83,30 +169,30 @@ const EventosLista = () => {
                         <div className="card">
                             <div className="card-body">
                                 <div className="form-group">
-                                    <table className="table table-hover" style={{ width: '100%' }}>
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Nome do Funcionário</th>
-                                                <th>Local</th>
-                                                <th>Endereço</th>
-                                                <th>Data Início</th>
-                                                <th>Data Fim</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {eventos.map((evento) => (
-                                                <tr key={evento.id} className="trtabela">
-                                                    <td>{evento.id}</td>
-                                                    <td>{evento.nome}</td>
-                                                    <td>{evento.local}</td>
-                                                    <td>{evento.endereco}</td>
-                                                    <td>{new Date(evento.dt_inicio).toLocaleDateString('pt-BR')}</td>
-                                                    <td>{new Date(evento.dt_fim).toLocaleDateString('pt-BR')}</td>
+                                    {funcionarios.length === 0 ? (
+                                        <div className="no-data">
+                                            Nenhum funcionário cadastrado
+                                        </div>
+                                    ) : (
+                                        <table className="table table-hover" style={{ width: '100%' }}>
+                                            <thead>
+                                                <tr>
+                                                    <th>CPF</th>
+                                                    <th>Nome do Funcionário</th>
+                                                    <th>Data de Admissão</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {funcionarios.map((funcionario) => (
+                                                    <tr key={funcionario.cpf} className="trtabela">
+                                                        <td>{funcionario.cpf}</td>
+                                                        <td>{funcionario.nome}</td>
+                                                        <td>{formatarData(funcionario.data_admissao)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
                                     
                                     <button 
                                         id="btnRedirecionar" 
@@ -128,12 +214,6 @@ const EventosLista = () => {
                     padding: 20px;
                 }
                 
-                .loading {
-                    text-align: center;
-                    padding: 50px;
-                    font-size: 18px;
-                }
-                
                 .boxH1ResPadraoDesktop {
                     display: flex;
                     justify-content: space-between;
@@ -143,6 +223,18 @@ const EventosLista = () => {
                     background: white;
                     border-radius: 8px;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                
+                .mesPremiadoPadraoDesktop {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                }
+                
+                .total-funcionarios {
+                    color: #666;
+                    font-size: 14px;
+                    font-weight: normal;
                 }
                 
                 .botoes-header {
@@ -219,6 +311,13 @@ const EventosLista = () => {
                 .trtabela:hover {
                     background-color: #f8f9fa;
                     cursor: pointer;
+                }
+                
+                .no-data {
+                    text-align: center;
+                    padding: 40px;
+                    color: #666;
+                    font-style: italic;
                 }
             `}</style>
         </div>

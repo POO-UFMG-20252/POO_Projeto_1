@@ -1,47 +1,171 @@
-from datetime import date
-from sqlite3 import Connection
-from classes.funcionario import Funcionario
-from database.connection import DatabaseConnection
 from services.funcionario_service import FuncionarioService
+from classes.funcionario import Funcionario
+from classes.custom_exception import CustomException
+from database.connection import DatabaseConnection
+from typing import List
 
 class FuncionarioServiceImpl(FuncionarioService):
-    def __init__(self, banco_de_dados: DatabaseConnection):
-        self.banco_de_dados = banco_de_dados
-        
-    def cadastrar_funcionario(self, cpf: str):
-        pass
+    def __init__(self, database_connection: DatabaseConnection):
+        self.db_connection = database_connection
     
-    def buscar_funcionario(self, cpf: str):
-        conexao_db = self.banco_de_dados.get_connection()
-        cursor = conexao_db.cursor()
-
-        cursor.execute("SELECT * FROM 't_funcionario' WHERE cpf = ?", (cpf,))
-        linha = cursor.fetchone()
-        funcionario = self._linha_para_funcionario(linha)
-
-        conexao_db.close()	
-        return funcionario
-    
-    @staticmethod
-    def _linha_para_funcionario(row):
-        if row:                
-            db_data_nasc = date.fromisoformat(row[4]) 
-            db_ativo = bool(row[7])                
+    def listar_funcionarios(self) -> List[Funcionario]:
+        conexao = self.db_connection.get_connection()
+        if not conexao:
+            raise CustomException("Erro ao conectar com o banco de dados")
+            
+        try:
+            cursor = conexao.cursor()
+            cursor.execute("""
+                SELECT cpf, nome, data_admissao 
+                FROM t_funcionario 
+                WHERE ativo = 1
+                ORDER BY nome
+            """)
+            
+            resultados = cursor.fetchall()
+            funcionarios = []
+            
+            for resultado in resultados:
+                # Criar funcionário com valores padrão para campos não buscados
+                funcionario = Funcionario(
+                    cpf=resultado['cpf'],
+                    nome=resultado['nome'],
+                    data_admissao=resultado['data_admissao'],
+                    email="",  # valor padrão
+                    senha="",  # valor padrão  
+                    data_nascimento="",  # valor padrão
+                    salario=0,  # valor padrão
+                    tipo=0,  # valor padrão
+                    ativo=True,  # valor padrão
+                    id_supervisor=0  # valor padrão
+                )
+                funcionarios.append(funcionario)
                 
-            funcionario_obj = Funcionario(
-                cpf=row[0],
-                nome=row[1],
-                senha=row[2],
-                email=row[3],
-                data_nascimento=db_data_nasc,
-                salario=row[5],
-                tipo=row[6],
-                ativo=db_ativo,
-                id_supervisor=row[8],
-                motivo_demissao=row[9]
+            return funcionarios
+            
+        except Exception as e:
+            print(f"Erro ao buscar funcionários: {e}")
+            raise CustomException("Erro ao buscar lista de funcionários")
+        finally:
+            if conexao:
+                conexao.close()
+    
+    def buscar_funcionario(self, cpf: str) -> Funcionario:
+        conexao = self.db_connection.get_connection()
+        if not conexao:
+            raise CustomException("Erro ao conectar com o banco de dados")
+            
+        try:
+            cursor = conexao.cursor()
+            cursor.execute("""
+                SELECT cpf, nome, email, senha, data_nascimento, 
+                       salario, tipo, ativo, id_supervisor, data_admissao
+                FROM t_funcionario 
+                WHERE cpf = ? AND ativo = 1
+            """, (cpf,))
+            
+            resultado = cursor.fetchone()
+            
+            if not resultado:
+                return None
+                
+            return Funcionario(
+                cpf=resultado['cpf'],
+                nome=resultado['nome'],
+                email=resultado['email'],
+                senha=resultado['senha'],
+                data_nascimento=resultado['data_nascimento'],
+                salario=resultado['salario'],
+                tipo=resultado['tipo'],
+                ativo=bool(resultado['ativo']),
+                id_supervisor=resultado['id_supervisor'],
+                data_admissao=resultado['data_admissao']
             )
-            return funcionario_obj
-        return None
+            
+        except Exception as e:
+            print(f"Erro ao buscar funcionário: {e}")
+            raise CustomException("Erro ao buscar funcionário")
+        finally:
+            if conexao:
+                conexao.close()
     
     def demitir(self, cpf_gerente: str, cpf_funcionario: str):
+        # Implementação futura
         pass
+    
+    def cadastrar_funcionario(self, nome: str, cpf: str, email: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
+        conexao = self.db_connection.get_connection()
+        if not conexao:
+            raise CustomException("Erro ao conectar com o banco de dados")
+        
+        try:
+            cursor = conexao.cursor()
+        
+            # Verificar se CPF já existe
+            cursor.execute("SELECT cpf FROM t_funcionario WHERE cpf = ?", (cpf,))
+            if cursor.fetchone():
+                raise CustomException("CPF já cadastrado")
+
+            # Verificar se email já existe
+            cursor.execute("SELECT cpf FROM t_funcionario WHERE email = ?", (email,))
+            if cursor.fetchone():
+                raise CustomException("Email já cadastrado")
+
+            # Mapear tipo string para número
+            tipo_map = {
+                'Gerente': 0,
+                'Caixa': 1,
+                'Repositor': 2
+            }
+
+            tipo_numero = tipo_map.get(tipo)
+            if tipo_numero is None:
+                raise CustomException("Tipo de funcionário inválido")
+
+            # Inserir novo funcionário
+            # Senha padrão: "123456" (hash bcrypt)
+            senha_hash = "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne"
+
+            cursor.execute("""
+                INSERT INTO t_funcionario (
+                    cpf, nome, senha, email, data_nascimento, data_admissao, 
+                    salario, tipo, ativo, id_supervisor
+                ) VALUES (?, ?, ?, ?, ?, date('now'), ?, ?, 1, 0)
+            """, (cpf, nome, senha_hash, email, data_nascimento, float(salario), tipo_numero))
+
+            conexao.commit()
+
+            # Buscar o funcionário recém-criado para retornar
+            cursor.execute("""
+                SELECT cpf, nome, email, data_nascimento, data_admissao, 
+                       salario, tipo, ativo, id_supervisor
+                FROM t_funcionario 
+                WHERE cpf = ?
+            """, (cpf,))
+
+            resultado = cursor.fetchone()
+
+            if not resultado:
+                raise CustomException("Erro ao recuperar funcionário cadastrado")
+
+            return Funcionario(
+                cpf=resultado['cpf'],
+                nome=resultado['nome'],
+                email=resultado['email'],
+                senha=senha_hash,
+                data_nascimento=resultado['data_nascimento'],
+                salario=resultado['salario'],
+                tipo=resultado['tipo'],
+                ativo=bool(resultado['ativo']),
+                id_supervisor=resultado['id_supervisor'],
+                data_admissao=resultado['data_admissao']
+            )
+        
+        except CustomException as e:
+            raise e
+        except Exception as e:
+            print(f"Erro ao cadastrar funcionário: {e}")
+            raise CustomException("Erro ao cadastrar funcionário")
+        finally:
+            if conexao:
+                conexao.close()
