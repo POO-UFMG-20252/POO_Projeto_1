@@ -11,9 +11,18 @@ class ProdutoServiceImpl(ProdutoService):
     def adicionar_produto(self,id: int, nome: str, marca: str):
         conexao_db = self.banco_de_dados.get_connection()
         cursor = conexao_db.cursor()
-        cursor.execute("INSERT INTO t_produto (id,nome,marca) VALUES (?, ?,?)", (id,nome,marca,))
-        conexao_db.commit()
-        conexao_db.close()
+        #testar por id preexiste:
+        cursor.execute("SELECT id FROM t_produto WHERE id =?",(id,))
+        produto_preexistente = cursor.fetchone()
+        if produto_preexistente:
+            conexao_db.close()
+            print(f"Erro ao adicionar produto: id preexistente")
+            return False
+        else:
+            cursor.execute("INSERT INTO t_produto (id,nome,marca) VALUES (?, ?,?)", (id,nome,marca,))
+            conexao_db.commit()
+            conexao_db.close()
+            return True
     
     @staticmethod
     def remover_produto(self,id: int):
