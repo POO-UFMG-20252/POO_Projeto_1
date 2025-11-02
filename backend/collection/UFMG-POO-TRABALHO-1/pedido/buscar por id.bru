@@ -1,0 +1,16 @@
+meta {
+  name: buscar por id
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:5000/api/pedido/3
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

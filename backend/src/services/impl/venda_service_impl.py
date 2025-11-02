@@ -1,10 +1,10 @@
 from sqlite3 import Connection
 
 from database.connection import DatabaseConnection
-from services.venda_service import vendaService
+from services.venda_service import VendaService
 from datetime import datetime
 
-class VendaSeriviceImpl(vendaService):
+class VendaSeriviceImpl(VendaService):
     def __init__(self, banco_de_dados: DatabaseConnection):
         self.banco_de_dados = banco_de_dados
 

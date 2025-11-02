@@ -37,7 +37,7 @@ class AutenticacaoServiceImpl(AutenticacaoService):
     
     @staticmethod
     def gerar_hash_senha(senha: str):
-        return bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        return bcrypt.hashpw(bytes(senha, 'utf-8'), bcrypt.gensalt())
 
     @staticmethod
     def _validar_senha(senha_recebida: str, senha_banco: str):

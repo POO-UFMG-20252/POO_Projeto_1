@@ -1,0 +1,16 @@
+meta {
+  name: remover
+  type: http
+  seq: 6
+}
+
+delete {
+  url: http://localhost:5000/api/pedido/3
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

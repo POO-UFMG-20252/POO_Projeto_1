@@ -5,13 +5,15 @@ class DatabaseConnection:
     def __init__(self):
         current_dir = os.path.dirname(__file__)
         self.db_path = os.path.join(current_dir, '../../resources/bancodedados.db')
+        conn = self.get_connection()
+        self._configurar_tabelas(conn)
+
         
     def get_connection(self):
         try:
             os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
             conn = sqlite3.connect(self.db_path, check_same_thread=False)
             conn.row_factory = sqlite3.Row
-            self._configurar_tabelas(conn)
             return conn
         except sqlite3.Error as e:
             print(f"❌ Erro ao conectar com o banco: {e}")
@@ -59,7 +61,7 @@ class DatabaseConnection:
                 (
                     '123.456.789-01', 
                     'João Silva', 
-                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
                     'joao.silva@empresa.com', 
                     '1985-03-15',
                     '2020-01-10',
@@ -71,7 +73,7 @@ class DatabaseConnection:
                 (
                     '234.567.890-12', 
                     'Maria Santos', 
-                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
                     'maria.santos@empresa.com', 
                     '1990-07-22',
                     '2021-03-20',
@@ -83,7 +85,7 @@ class DatabaseConnection:
                 (
                     '345.678.901-23', 
                     'Pedro Oliveira', 
-                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
                     'pedro.oliveira@empresa.com', 
                     '1988-11-30',
                     '2019-08-05',
@@ -95,7 +97,7 @@ class DatabaseConnection:
                 (
                     '456.789.012-34', 
                     'Ana Costa', 
-                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
                     'ana.costa@empresa.com', 
                     '1992-05-18',
                     '2022-02-14',
@@ -107,7 +109,7 @@ class DatabaseConnection:
                 (
                     '567.890.123-45', 
                     'Carlos Lima', 
-                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
                     'carlos.lima@empresa.com', 
                     '1987-12-03',
                     '2020-11-08',
@@ -119,7 +121,7 @@ class DatabaseConnection:
                 (
                     '678.901.234-56', 
                     'Juliana Pereira', 
-                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
                     'juliana.pereira@empresa.com', 
                     '1991-09-25',
                     '2023-01-30',
@@ -234,8 +236,9 @@ class DatabaseConnection:
         
         #t_vendas_produtos - salva os produtos do mercado que foram vendidos 
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_vendas_produtos" (
-        "id_venda"   INTEGER NOT NULL,
-        "id_produto" INTEGER NOT NULL,
-        "quantidade" INTEGER NOT NULL,
-        PRIMARY KEY("id_venda", "id_produto")
-        );""")
+                "id" INTEGER NOT NULL UNIQUE,
+                "id_venda"   INTEGER NOT NULL,
+                "id_produto" INTEGER NOT NULL,
+                "quantidade" INTEGER NOT NULL,
+                PRIMARY KEY("id")
+                );""")

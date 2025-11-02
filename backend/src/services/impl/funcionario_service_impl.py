@@ -6,7 +6,7 @@ from classes.funcionario import Funcionario
 from classes.custom_exception import CustomException
 from database.connection import DatabaseConnection
 from services.funcionario_service import FuncionarioService
-from services.autenticacao_service import AutenticacaoService
+from services.impl.autenticacao_service_impl import AutenticacaoServiceImpl
 
 class FuncionarioServiceImpl(FuncionarioService):
     def __init__(self, database_connection: DatabaseConnection):
@@ -16,7 +16,7 @@ class FuncionarioServiceImpl(FuncionarioService):
         conexao = self.db_connection.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
-            
+
         try:
             cursor = conexao.cursor()
             cursor.execute("""
@@ -96,7 +96,7 @@ class FuncionarioServiceImpl(FuncionarioService):
     def demitir(self, cpf_gerente: str, cpf_funcionario: str):
         pass
     
-    def cadastrar_funcionario(self, nome: str, cpf: str, email: str, senha: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
+    def cadastrar_funcionario(self, nome: str, cpf: str, email: str, senha: str, data_nascimento: str, salario: float, tipo: str) -> Funcionario:
         conexao = self.db_connection.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
@@ -118,9 +118,9 @@ class FuncionarioServiceImpl(FuncionarioService):
             if tipo_numero is None:
                 raise CustomException("Tipo de funcionário inválido")
 
-            # Inserir novo funcionário
-            # Senha padrão: "123456" (hash bcrypt)
-            senha_hash = AutenticacaoService.gerar_hash_senha(senha)
+            senha_hash = AutenticacaoServiceImpl.gerar_hash_senha(senha)
+            print(senha)
+            print(senha_hash)
 
             cursor.execute("""
                 INSERT INTO t_funcionario (
@@ -167,7 +167,7 @@ class FuncionarioServiceImpl(FuncionarioService):
                 conexao.close()
                 
     def _validar_cpf(self, cursor: sqlite3.Cursor, cpf: str):
-        if (len(cpf) != 11) :
+        if (len(cpf) != 14) :
             raise CustomException("CPF invalido")
         
         # Verificar se CPF já existe

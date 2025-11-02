@@ -1,6 +1,7 @@
 # funcionario_controller.py
-from flask import Blueprint, request, jsonify
+from flask import request, jsonify
 from services.funcionario_service import FuncionarioService
+from services.autenticacao_service import AutenticacaoService
 from classes.contoller_error import ControllerError
 from classes.custom_exception import CustomException
 
@@ -9,11 +10,11 @@ class FuncionarioController():
         self.funcionario_service = funcionarioService
         
     def registrar_rotas(self, app):
-        app.add_url_rule('/funcionarios', 'listar_funcionarios', self.listar_funcionarios, methods=['GET'])
-        app.add_url_rule('/funcionarios', 'cadastrar_funcionario', self.cadastrar_funcionario, methods=['POST'])
+        app.add_url_rule('/api/funcionarios', 'listar_funcionarios', self.listar_funcionarios, methods=['GET'])
+        app.add_url_rule('/api/funcionarios', 'cadastrar_funcionario', self.cadastrar_funcionario, methods=['POST'])
         
-    def listar_funcionarios(self):
-        try:
+    def listar_funcionarios(self):        
+        try:            
             funcionarios = self.funcionario_service.listar_funcionarios()
             return jsonify([funcionario.to_dict() for funcionario in funcionarios])
         except CustomException as e:
@@ -47,7 +48,6 @@ class FuncionarioController():
                 'message': 'Funcionário cadastrado com sucesso',
                 'funcionario': funcionario.to_dict()
             }), 201
-            
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:

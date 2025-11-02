@@ -1,19 +1,19 @@
 meta {
   name: login
   type: http
-  seq: 1
+  seq: 2
 }
 
 post {
-  url: http://localhost:5000/autenticacao/login
+  url: http://localhost:5000/api/autenticacao/login
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "cpf":"12345678900",
-    "senha":"senhafoda"
+    "cpf":"123.456.789-01",
+    "senha":"123456"
   }
 }
 

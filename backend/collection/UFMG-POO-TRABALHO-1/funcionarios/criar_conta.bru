@@ -1,0 +1,28 @@
+meta {
+  name: criar_conta
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5000/api/funcionarios
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "nome":"Artur Teste",
+    "cpf":"153.691.906-31",
+    "email":"arturteste@teste.teste",
+    "senha":"teste",
+    "data_nascimento":"02/22/2003",
+    "salario": 350000,
+    "tipo": "Gerente"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -5,7 +5,7 @@ from classes.funcionario import Funcionario
 
 class FuncionarioService:
     @abstractmethod
-    def cadastrar_funcionario(self, nome: str, cpf: str, email: str, senha: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
+    def cadastrar_funcionario(self, nome: str, cpf: str, email: str, senha: str, data_nascimento: str, salario: float, tipo: str) -> Funcionario:
         pass
     
     @abstractmethod

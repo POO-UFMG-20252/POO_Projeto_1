@@ -10,8 +10,8 @@ class EstoqueController():
         self.estoque_service = estoque_service
 
     def registrar_rotas(self, app):
-        app.add_url_rule('/api/estoque', 'buscar_estoque', self.login, methods=['GET'])
-        app.add_url_rule('/api/estoque/<int:item_id>', 'buscar_produto_estoque', self.login, methods=['GET'])
+        app.add_url_rule('/api/estoque', 'buscar_estoque', self.get_estoque, methods=['GET'])
+        app.add_url_rule('/api/estoque/<int:item_id>', 'buscar_produto_estoque', self.get_item_estoque, methods=['GET'])
 
     def get_estoque(self):
         try:

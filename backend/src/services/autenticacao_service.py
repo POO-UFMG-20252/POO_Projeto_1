@@ -4,7 +4,7 @@ from classes.funcionario import Funcionario
 
 class AutenticacaoService():
     @abstractmethod
-    def cadastro() -> Funcionario:
+    def validar_acesso(self, token: str, nivel_de_acesso: int) -> bool:
         pass
     @abstractmethod
     def login(self, cpf: str, senha: str) -> str:

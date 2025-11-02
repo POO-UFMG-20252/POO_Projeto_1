@@ -16,16 +16,14 @@ class AutenticacaoController():
     def login(self):
         data = request.get_json()
     
-        cpf = data.get('cpf')
-        senha = data.get('senha')
-    
-        if not cpf:
-            return jsonify(ControllerError('CPF é obrigatório').to_dict()), 400
-        if not senha:
-            return jsonify(ControllerError('Senha é obrigatório').to_dict()), 400
-    
+        # Validações básicas
+        required_fields = ['cpf', 'senha']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
+            
         try:
-            token = self.autenticacao_service.login(cpf, senha)
+            token = self.autenticacao_service.login(data['cpf'], data['senha'])
             return jsonify({'token': token})
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
