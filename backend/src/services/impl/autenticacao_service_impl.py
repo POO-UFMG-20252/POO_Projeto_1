@@ -22,8 +22,17 @@ class AutenticacaoServiceImpl(AutenticacaoService):
         
         raise CustomException("Senha inválida!")
             
-    def validar_acesso(token: str, nivel_de_acesso: int):
-        return True
+    def validar_acesso(self, token: str, nivel_de_acesso: int):
+        try:
+            payload = jwt.decode(token, self.chave_secreta, algorithms=[self.algoritmo])
+            for a in nivel_de_acesso:
+                if payload["tipo"] == a:
+                    return True
+            return False
+        except jwt.ExpiredSignatureError:
+            raise CustomException("Token expirado! Por favor, faça login novamente!")
+        except jwt.InvalidTokenError:
+            raise CustomException("Token inválido!")
     
     @staticmethod
     def _gerar_hash_senha(senha: str):
@@ -41,6 +50,5 @@ class AutenticacaoServiceImpl(AutenticacaoService):
             "exp": datetime.now() + timedelta(hours=4),
             "tipo": tipo
         }
-
         token_jwt = jwt.encode(payload, self.chave_secreta, self.algoritmo)
         return token_jwt
