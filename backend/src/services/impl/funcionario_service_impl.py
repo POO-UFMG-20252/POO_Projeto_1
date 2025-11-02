@@ -103,6 +103,10 @@ class FuncionarioServiceImpl(FuncionarioService):
         
         try:
             cursor = conexao.cursor()
+            
+            cpf = cpf.replace('.', '')
+            cpf = cpf.replace('-', '')
+            cpf = cpf.replace(' ', '')
         
             self._validar_cpf(cursor, cpf)
             self._validar_email(cursor, email)
@@ -167,7 +171,7 @@ class FuncionarioServiceImpl(FuncionarioService):
                 conexao.close()
                 
     def _validar_cpf(self, cursor: sqlite3.Cursor, cpf: str):
-        if (len(cpf) != 14) :
+        if (len(cpf) != 11) :
             raise CustomException("CPF invalido")
         
         # Verificar se CPF já existe

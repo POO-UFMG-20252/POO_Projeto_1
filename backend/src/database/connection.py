@@ -59,9 +59,9 @@ class DatabaseConnection:
                     "id_supervisor"
                 ) VALUES 
                 (
-                    '123.456.789-01', 
+                    '12345678901', 
                     'João Silva', 
-                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
+                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
                     'joao.silva@empresa.com', 
                     '1985-03-15',
                     '2020-01-10',
@@ -71,9 +71,9 @@ class DatabaseConnection:
                     0
                 ),
                 (
-                    '234.567.890-12', 
+                    '23456789012', 
                     'Maria Santos', 
-                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
+                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
                     'maria.santos@empresa.com', 
                     '1990-07-22',
                     '2021-03-20',
@@ -83,9 +83,9 @@ class DatabaseConnection:
                     1
                 ),
                 (
-                    '345.678.901-23', 
+                    '34567890123', 
                     'Pedro Oliveira', 
-                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
+                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
                     'pedro.oliveira@empresa.com', 
                     '1988-11-30',
                     '2019-08-05',
@@ -95,9 +95,9 @@ class DatabaseConnection:
                     1
                 ),
                 (
-                    '456.789.012-34', 
+                    '45678901234', 
                     'Ana Costa', 
-                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
+                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
                     'ana.costa@empresa.com', 
                     '1992-05-18',
                     '2022-02-14',
@@ -107,9 +107,9 @@ class DatabaseConnection:
                     1
                 ),
                 (
-                    '567.890.123-45', 
+                    '56789012345', 
                     'Carlos Lima', 
-                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
+                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
                     'carlos.lima@empresa.com', 
                     '1987-12-03',
                     '2020-11-08',
@@ -119,9 +119,9 @@ class DatabaseConnection:
                     1
                 ),
                 (
-                    '678.901.234-56', 
+                    '67890123456', 
                     'Juliana Pereira', 
-                    '$2a$12$qpwU.PpTRp4iyzzmTXCsWeIMavqA5n0y8sDgF7DaAwaPipfvEZNKK',
+                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
                     'juliana.pereira@empresa.com', 
                     '1991-09-25',
                     '2023-01-30',

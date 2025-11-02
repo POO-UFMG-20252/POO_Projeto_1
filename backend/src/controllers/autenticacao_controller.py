@@ -3,13 +3,11 @@ from services.autenticacao_service import AutenticacaoService
 from controllers.controller import Controller
 from classes.contoller_error import ControllerError
 from classes.custom_exception import CustomException
-from utils.helpers import AuthUtils
 
 class AutenticacaoController(Controller):
     def __init__(self, nome: str, autenticacaoService: AutenticacaoService):
         super().__init__(nome, autenticacaoService)
         self.autenticacao_service = autenticacaoService
-        self.auth_utils = AuthUtils()
         
     def registrar_rotas(self, app):
         app.add_url_rule('/api/autenticacao/login', 'login', self.login, methods=['POST'])
@@ -35,7 +33,8 @@ class AutenticacaoController(Controller):
         
     def get_usuario(self):
         try:
-            usuario = self.auth_utils.get_usuario_logado()
+            usuario = self.get_usuario_logado(request, [0, 1, 2])
+            
             if not usuario:
                 return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
             

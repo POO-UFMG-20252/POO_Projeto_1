@@ -17,19 +17,22 @@ class AutenticacaoServiceImpl(AutenticacaoService):
         if (funcionario == None):
             raise CustomException("Usuario nao encontrado!")
         
-        if (self._validar_senha(senha, funcionario.senha)):
-            return self._gerar_token(funcionario.cpf, funcionario.nome, funcionario.email, funcionario.tipo)
+        if (self.__validar_senha(senha, funcionario.senha)):
+            return self.__gerar_token(funcionario.cpf, funcionario.nome, funcionario.email, funcionario.tipo)
         
         raise CustomException("Senha inválida!")
             
     def validar_acesso(self, token: str, nivel_de_acesso: int):
         try:
-            payload = jwt.decode(token, self.chave_secreta, algorithms=[self.algoritmo])
-            
-            funcionario = self.funcionario_service.buscar_funcionario(payload['cpf'])
-        
+            payload = jwt.decode(token, self.chave_secreta, algorithms=[self.algoritmo])            
+                    
             if (payload["tipo"] in nivel_de_acesso):
-                return funcionario
+                return {
+                    'cpf': payload.get('cpf'),
+                    'nome': payload.get('nome'),
+                    'email': payload.get('email'),
+                    'tipo': payload.get('tipo')  # 0=Gerente, 1=Repositor, 2=Caixa
+                }
 
             raise CustomException("Usuário não autorizado a acessar essa funcionalidade")
         except jwt.ExpiredSignatureError:
@@ -42,11 +45,10 @@ class AutenticacaoServiceImpl(AutenticacaoService):
         return bcrypt.hashpw(bytes(senha, 'utf-8'), bcrypt.gensalt())
 
     @staticmethod
-    def _validar_senha(senha_recebida: str, senha_banco: str):
-        if (senha_banco == senha_recebida):
-            return True
+    def __validar_senha(senha_recebida: str, senha_banco: str):
+        return bcrypt.checkpw(bytes(senha_recebida, 'utf-8'), bytes(senha_banco, 'utf-8'))
 
-    def _gerar_token(self, cpf: str, nome: str, email: str, tipo: int):
+    def __gerar_token(self, cpf: str, nome: str, email: str, tipo: int):
         payload = {
             "cpf": cpf,
             "nome": nome,

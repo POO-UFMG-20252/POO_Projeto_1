@@ -2,9 +2,9 @@ from datetime import date
 
 class Funcionario:
     def __init__(self, cpf: str, nome: str, data_admissao: str, 
-                 email: str = "", senha: str = "", data_nascimento: str = "",
-                 salario: float = 0, tipo: int = 0, ativo: bool = True, 
-                 id_supervisor: int = 0):
+                email: str = "", senha: str = "", data_nascimento: str = "",
+                salario: float = 0, tipo: int = 0, ativo: bool = True, 
+                id_supervisor: int = 0):
         self.cpf = cpf
         self.nome = nome
         self.data_admissao = data_admissao

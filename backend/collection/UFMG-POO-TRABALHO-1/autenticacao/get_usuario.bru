@@ -1,0 +1,20 @@
+meta {
+  name: get_usuario
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:5000/api/autenticacao/usuario
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcGYiOiIxMjM0NTY3ODkwMSIsIm5vbWUiOiJKb1x1MDBlM28gU2lsdmEiLCJlbWFpbCI6ImpvYW8uc2lsdmFAZW1wcmVzYS5jb20iLCJleHAiOjE3NjIxMjU3MzMsInRpcG8iOjF9.ouBDN6CX3yVL4-Nd7mC3Es-WPu-RfydCmpy_otFE2ao
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
