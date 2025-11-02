@@ -223,3 +223,18 @@ class DatabaseConnection:
                 "password" TEXT NOT NULL,
                 PRIMARY KEY("id")
                 );""")
+        
+        #t_vendas - salva dados de vendas
+        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_vendas" (
+                "id" INTEGER NOT NULL UNIQUE,
+                "id_responsavel" INTEGER NOT NULL,
+                "time" INTEGER NOT NULL,
+                PRIMARY KEY("id")
+                );""")
+        
+        #t_vendas_produtos - salva os produtos do mercado que foram vendidos 
+        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_vendas_produtos" (
+                "id_venda"   INTEGER NOT NULL ,
+                "id_produto" INTEGER NOT NULL ,
+                "quantidade" INTEGER NOT NULL,
+                );""")
