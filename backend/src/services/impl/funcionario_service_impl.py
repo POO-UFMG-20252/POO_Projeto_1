@@ -65,7 +65,7 @@ class FuncionarioServiceImpl(FuncionarioService):
                 SELECT cpf, nome, email, senha, data_nascimento, 
                     salario, tipo, ativo, id_supervisor, data_admissao
                 FROM t_funcionario 
-                WHERE cpf = ? AND ativo = 1
+                WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?  AND ativo = 1
             """, (cpf,))
             
             resultado = cursor.fetchone()

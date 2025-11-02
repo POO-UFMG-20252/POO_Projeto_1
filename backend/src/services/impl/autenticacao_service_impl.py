@@ -17,7 +17,7 @@ class AutenticacaoServiceImpl(AutenticacaoService):
         if (funcionario == None):
             raise CustomException("Usuario nao encontrado!")
         
-        if (self._validar_senha(senha.encode('utf-8'), funcionario.senha.encode('utf-8'))):
+        if (self._validar_senha(senha, funcionario.senha)):
             return self._gerar_token(funcionario.cpf, funcionario.nome, funcionario.email, funcionario.tipo)
         
         raise CustomException("Senha inválida!")
@@ -25,10 +25,11 @@ class AutenticacaoServiceImpl(AutenticacaoService):
     def validar_acesso(self, token: str, nivel_de_acesso: int):
         try:
             payload = jwt.decode(token, self.chave_secreta, algorithms=[self.algoritmo])
-            for a in nivel_de_acesso:
-                if payload["tipo"] == a:
-                    return True
-            return False
+        
+            if isinstance(nivel_de_acesso, list):
+                return payload["tipo"] in nivel_de_acesso
+            else:
+                return payload["tipo"] == nivel_de_acesso
         except jwt.ExpiredSignatureError:
             raise CustomException("Token expirado! Por favor, faça login novamente!")
         except jwt.InvalidTokenError:
@@ -36,11 +37,12 @@ class AutenticacaoServiceImpl(AutenticacaoService):
     
     @staticmethod
     def gerar_hash_senha(senha: str):
-        return bcrypt.hashpw(senha, bcrypt.gensalt())
+        return bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     @staticmethod
     def _validar_senha(senha_recebida: str, senha_banco: str):
-        return bcrypt.checkpw(senha_recebida, senha_banco)
+        if (senha_banco == senha_recebida):
+            return True
 
     def _gerar_token(self, cpf: str, nome: str, email: str, tipo: int):
         payload = {

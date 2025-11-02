@@ -59,7 +59,7 @@ const CadastroVendas = () => {
                         <div className="card-header bg-primary text-white py-3">
                             <h2 className="h4 mb-0 text-center">
                                 <i className="bi bi-cart-plus me-2"></i>
-                                Cadastrar Venda
+                                Realizar Pedido
                             </h2>
                         </div>
                         
@@ -207,7 +207,7 @@ const CadastroVendas = () => {
                                                 onClick={handleSubmit}
                                             >
                                                 <i className="bi bi-credit-card me-2"></i>
-                                                Ir para Pagamento
+                                                Confirmar Pedido
                                             </button>
                                         </div>
                                     </div>

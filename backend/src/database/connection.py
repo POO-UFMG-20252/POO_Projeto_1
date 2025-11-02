@@ -234,7 +234,8 @@ class DatabaseConnection:
         
         #t_vendas_produtos - salva os produtos do mercado que foram vendidos 
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_vendas_produtos" (
-                "id_venda"   INTEGER NOT NULL ,
-                "id_produto" INTEGER NOT NULL ,
-                "quantidade" INTEGER NOT NULL,
-                );""")
+        "id_venda"   INTEGER NOT NULL,
+        "id_produto" INTEGER NOT NULL,
+        "quantidade" INTEGER NOT NULL,
+        PRIMARY KEY("id_venda", "id_produto")
+        );""")
