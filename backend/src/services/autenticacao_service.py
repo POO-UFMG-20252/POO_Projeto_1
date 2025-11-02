@@ -7,3 +7,6 @@ class AutenticacaoService():
     @abstractmethod
     def login(self, cpf: str, senha: str):
         pass
+    @abstractmethod
+    def gerar_hash_senha(senha: str):
+        pass

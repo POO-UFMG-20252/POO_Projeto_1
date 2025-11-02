@@ -4,7 +4,7 @@ from classes.funcionario import Funcionario
 
 class FuncionarioService:
     @abstractmethod
-    def cadastrar_funcionario(self, nome: str, cpf: str, email: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
+    def cadastrar_funcionario(self, nome: str, cpf: str, senha: str,email: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
         pass
     
     @abstractmethod
@@ -16,9 +16,5 @@ class FuncionarioService:
         pass
     
     @abstractmethod
-    def listar_subordinados(self, cpf: str):
-        pass
-    
-    @abstractmethod
-    def demitir(self, cpf_gerente: str, cpf_funcionario: str):
+    def demitir(self, cpf_gerente: str, cpf_funcionario: str) -> Funcionario:
         pass

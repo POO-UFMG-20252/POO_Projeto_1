@@ -1,8 +1,12 @@
-from services.funcionario_service import FuncionarioService
+import bcrypt
+import sqlite3
+from typing import List
+
 from classes.funcionario import Funcionario
 from classes.custom_exception import CustomException
 from database.connection import DatabaseConnection
-from typing import List
+from services.funcionario_service import FuncionarioService
+from services.autenticacao_service import AutenticacaoService
 
 class FuncionarioServiceImpl(FuncionarioService):
     def __init__(self, database_connection: DatabaseConnection):
@@ -59,7 +63,7 @@ class FuncionarioServiceImpl(FuncionarioService):
             cursor = conexao.cursor()
             cursor.execute("""
                 SELECT cpf, nome, email, senha, data_nascimento, 
-                       salario, tipo, ativo, id_supervisor, data_admissao
+                    salario, tipo, ativo, id_supervisor, data_admissao
                 FROM t_funcionario 
                 WHERE cpf = ? AND ativo = 1
             """, (cpf,))
@@ -90,10 +94,9 @@ class FuncionarioServiceImpl(FuncionarioService):
                 conexao.close()
     
     def demitir(self, cpf_gerente: str, cpf_funcionario: str):
-        # Implementação futura
         pass
     
-    def cadastrar_funcionario(self, nome: str, cpf: str, email: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
+    def cadastrar_funcionario(self, nome: str, cpf: str, senha: str, email: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
         conexao = self.db_connection.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
@@ -101,15 +104,8 @@ class FuncionarioServiceImpl(FuncionarioService):
         try:
             cursor = conexao.cursor()
         
-            # Verificar se CPF já existe
-            cursor.execute("SELECT cpf FROM t_funcionario WHERE cpf = ?", (cpf,))
-            if cursor.fetchone():
-                raise CustomException("CPF já cadastrado")
-
-            # Verificar se email já existe
-            cursor.execute("SELECT cpf FROM t_funcionario WHERE email = ?", (email,))
-            if cursor.fetchone():
-                raise CustomException("Email já cadastrado")
+            self._validar_cpf(cursor, cpf)
+            self._validar_email(cursor, email)
 
             # Mapear tipo string para número
             tipo_map = {
@@ -124,7 +120,7 @@ class FuncionarioServiceImpl(FuncionarioService):
 
             # Inserir novo funcionário
             # Senha padrão: "123456" (hash bcrypt)
-            senha_hash = "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne"
+            senha_hash = AutenticacaoService.gerar_hash_senha(senha)
 
             cursor.execute("""
                 INSERT INTO t_funcionario (
@@ -138,7 +134,7 @@ class FuncionarioServiceImpl(FuncionarioService):
             # Buscar o funcionário recém-criado para retornar
             cursor.execute("""
                 SELECT cpf, nome, email, data_nascimento, data_admissao, 
-                       salario, tipo, ativo, id_supervisor
+                    salario, tipo, ativo, id_supervisor
                 FROM t_funcionario 
                 WHERE cpf = ?
             """, (cpf,))
@@ -152,7 +148,7 @@ class FuncionarioServiceImpl(FuncionarioService):
                 cpf=resultado['cpf'],
                 nome=resultado['nome'],
                 email=resultado['email'],
-                senha=senha_hash,
+                senha="",
                 data_nascimento=resultado['data_nascimento'],
                 salario=resultado['salario'],
                 tipo=resultado['tipo'],
@@ -169,3 +165,24 @@ class FuncionarioServiceImpl(FuncionarioService):
         finally:
             if conexao:
                 conexao.close()
+                
+    def _validar_cpf(self, cursor: sqlite3.Cursor, cpf: str):
+        if (len(cpf) != 11) :
+            raise CustomException("CPF invalido")
+        
+        # Verificar se CPF já existe
+        cursor.execute("SELECT cpf FROM t_funcionario WHERE cpf = ?", (cpf,))
+        if cursor.fetchone():
+            raise CustomException("CPF já cadastrado")
+        
+    def _validar_email(self, cursor: sqlite3.Cursor, email: str):
+        if (email.find("@") == -1):
+            raise CustomException("Email inválido")
+        
+        if (email.split("@")[1].find(".") == -1):
+            raise CustomException("Email inválido")
+        
+        # Verificar se email já existe
+        cursor.execute("SELECT cpf FROM t_funcionario WHERE email = ?", (email,))
+        if cursor.fetchone():
+            raise CustomException("Email já cadastrado")

@@ -35,7 +35,7 @@ class AutenticacaoServiceImpl(AutenticacaoService):
             raise CustomException("Token inválido!")
     
     @staticmethod
-    def _gerar_hash_senha(senha: str):
+    def gerar_hash_senha(senha: str):
         return bcrypt.hashpw(senha, bcrypt.gensalt())
 
     @staticmethod
