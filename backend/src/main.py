@@ -25,11 +25,11 @@ def main():
     produtoService = ProdutoServiceImpl(conexaoBancoDeDados)
     vendaService = VendaSeriviceImpl(conexaoBancoDeDados)
     
-    autenticacaoController = AutenticacaoController(autenticacaoService)
-    funcionarioController = FuncionarioController(funcionarioService)
-    estoqueController = EstoqueController(estoqueService)
-    pedidoController = PedidoController(pedidoService)
-    produtoController = ProdutoController(produtoService)
+    autenticacaoController = AutenticacaoController('autenticacao', autenticacaoService)
+    funcionarioController = FuncionarioController('funcionario', funcionarioService, autenticacaoService)
+    estoqueController = EstoqueController('estoque', estoqueService, autenticacaoService)
+    pedidoController = PedidoController('pedido', pedidoService, autenticacaoService)
+    produtoController = ProdutoController('produto', produtoService, autenticacaoService)
     
     controllers = [
         autenticacaoController,

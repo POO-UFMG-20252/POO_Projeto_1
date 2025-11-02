@@ -1,12 +1,15 @@
 # funcionario_controller.py
 from flask import request, jsonify
+
 from services.funcionario_service import FuncionarioService
 from services.autenticacao_service import AutenticacaoService
+from controllers.controller import Controller
 from classes.contoller_error import ControllerError
 from classes.custom_exception import CustomException
 
-class FuncionarioController():
-    def __init__(self, funcionarioService: FuncionarioService):
+class FuncionarioController(Controller):
+    def __init__(self, nome: str, funcionarioService: FuncionarioService, autenticacaoService: AutenticacaoService):
+        super().__init__(nome, autenticacaoService)
         self.funcionario_service = funcionarioService
         
     def registrar_rotas(self, app):

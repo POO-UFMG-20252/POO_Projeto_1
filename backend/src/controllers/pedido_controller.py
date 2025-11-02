@@ -1,7 +1,10 @@
+from controllers.controller import Controller
+from services.autenticacao_service import AutenticacaoService
 from services.pedido_service import PedidoService
 
-class PedidoController():
-    def __init__(self, pedido_service: PedidoService):
+class PedidoController(Controller):
+    def __init__(self, nome: str, pedido_service: PedidoService, autenticacaoService: AutenticacaoService):
+        super().__init__(nome, autenticacaoService)
         self.pedido_service = pedido_service
     
     def registrar_rotas(self, app):

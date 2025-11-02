@@ -1,12 +1,14 @@
 from flask import request, jsonify
 from services.autenticacao_service import AutenticacaoService
+from controllers.controller import Controller
 from classes.contoller_error import ControllerError
 from classes.custom_exception import CustomException
 from utils.helpers import AuthUtils
 
-class AutenticacaoController():
-    def __init__(self, autenticacao_service: AutenticacaoService):
-        self.autenticacao_service = autenticacao_service
+class AutenticacaoController(Controller):
+    def __init__(self, nome: str, autenticacaoService: AutenticacaoService):
+        super().__init__(nome, autenticacaoService)
+        self.autenticacao_service = autenticacaoService
         self.auth_utils = AuthUtils()
         
     def registrar_rotas(self, app):

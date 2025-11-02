@@ -2,10 +2,13 @@ from flask import request, jsonify
 
 from classes.contoller_error import ControllerError
 from classes.custom_exception import CustomException
+from controllers.controller import Controller
+from services.autenticacao_service import AutenticacaoService
 from services.produto_service import ProdutoService
 
-class ProdutoController():
-    def __init__(self, produto_service: ProdutoService):
+class ProdutoController(Controller):
+    def __init__(self, nome: str, produto_service: ProdutoService, autenticacaoService: AutenticacaoService):
+        super().__init__(nome, autenticacaoService)
         self.produto_service = produto_service
     
     def registrar_rotas(self, app):

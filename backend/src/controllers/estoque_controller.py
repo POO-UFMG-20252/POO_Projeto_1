@@ -1,13 +1,14 @@
-import os
-import sys
 from flask import Blueprint, jsonify
 
 from classes.contoller_error import ControllerError
+from controllers.controller import Controller
+from services.autenticacao_service import AutenticacaoService
 from services.estoque_service import EstoqueService
 
-class EstoqueController():
-    def __init__(self, estoque_service: EstoqueService):
-        self.estoque_service = estoque_service
+class EstoqueController(Controller):
+    def __init__(self, nome: str, estoqueService: EstoqueService, autenticacaoService: AutenticacaoService):
+        super().__init__(nome, autenticacaoService)
+        self.estoque_service = estoqueService
 
     def registrar_rotas(self, app):
         app.add_url_rule('/api/estoque', 'buscar_estoque', self.get_estoque, methods=['GET'])

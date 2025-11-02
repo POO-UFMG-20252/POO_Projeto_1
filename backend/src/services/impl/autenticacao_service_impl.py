@@ -25,11 +25,13 @@ class AutenticacaoServiceImpl(AutenticacaoService):
     def validar_acesso(self, token: str, nivel_de_acesso: int):
         try:
             payload = jwt.decode(token, self.chave_secreta, algorithms=[self.algoritmo])
+            
+            funcionario = self.funcionario_service.buscar_funcionario(payload['cpf'])
         
-            if isinstance(nivel_de_acesso, list):
-                return payload["tipo"] in nivel_de_acesso
-            else:
-                return payload["tipo"] == nivel_de_acesso
+            if (payload["tipo"] in nivel_de_acesso):
+                return funcionario
+
+            raise CustomException("Usuário não autorizado a acessar essa funcionalidade")
         except jwt.ExpiredSignatureError:
             raise CustomException("Token expirado! Por favor, faça login novamente!")
         except jwt.InvalidTokenError:
