@@ -9,6 +9,9 @@ import Pedido from "./pages/Pedido"
 import Estoque from "./pages/Estoque"
 import Teste from "./pages/Teste"
 import Lista_Func from "./pages/Lista_Func"
+import Lista_Pedidos from "./pages/Lista_Pedidos"
+import Cadastro_Func from "./pages/Cadastro_Func"
+import Lista_Gerente from "./pages/Lista_Gerente"
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import "./style.scss"
@@ -51,6 +54,18 @@ const router = createBrowserRouter([
             {
                 path: "/estoque",
                 element: <Estoque />,
+            },
+            {
+                path: "/lista_gerente",
+                element: <Lista_Gerente />,
+            },
+                        {
+                path: "/lista_pedidos",
+                element: <Lista_Pedidos />,
+            },
+                        {
+                path: "/cadastro_func",
+                element: <Cadastro_Func />,
             },
             {
                 path: "/teste",

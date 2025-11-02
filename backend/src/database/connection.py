@@ -9,53 +9,128 @@ class DatabaseConnection:
     def get_connection(self):
         try:
             os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-            conn = sqlite3.connect(self.db_path)
+            conn = sqlite3.connect(self.db_path, check_same_thread=False)
             conn.row_factory = sqlite3.Row
             self._configurar_tabelas(conn)
-        
             return conn
         except sqlite3.Error as e:
             print(f"❌ Erro ao conectar com o banco: {e}")
             return None
             
     def _configurar_tabelas(self, conexao: sqlite3.Connection):
-        # t_funcionario - salva os dados dos usuarios
-        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_funcionario" (
-                "cpf" VARCHAR NOT NULL UNIQUE,
-                "nome" VARCHAR NOT NULL,
-                "senha" VARCHAR NOT NULL,
-                "email" VARCHAR NOT NULL,
-                "data_nascimento" DATE NOT NULL,
-                "salario" REAL NOT NULL DEFAULT 0,
-                "tipo" INTEGER NOT NULL,
-                "ativo" BOOLEAN NOT NULL,
-                "id_supervisor" INTEGER NOT NULL,
-                "motivo_demissao" VARCHAR,
-                PRIMARY KEY("cpf")
-                );""")
+        cursor = conexao.cursor()
         
-        conexao.cursor().execute("""INSERT INTO "t_funcionario" (
-                "cpf", 
-                "nome", 
-                "senha", 
-                "email", 
-                "data_nascimento", 
-                "salario", 
-                "tipo", 
-                "ativo", 
-                "id_supervisor", 
-                "motivo_demissao"
-            ) VALUES (
-                '12345678900',
-                'Carlos Andrade',
-                '$2a$12$k4Af3vdw7RiQuDU8K1Oi..Ex2kDpjoZndRMvKQGYpD5E/lBqkvtK2',
-                'carlos.andrade@email.com',
-                '1990-07-15',
-                8200.00,
-                1,
-                1,
-                101,
-                NULL);""")
+        # t_funcionario - salva os dados dos usuarios
+        cursor.execute("""CREATE TABLE IF NOT EXISTS "t_funcionario" (
+            "cpf" VARCHAR NOT NULL UNIQUE,
+            "nome" VARCHAR NOT NULL,
+            "senha" VARCHAR NOT NULL,
+            "email" VARCHAR NOT NULL,
+            "data_nascimento" DATE NOT NULL,
+            "data_admissao" DATE NOT NULL DEFAULT CURRENT_DATE,
+            "salario" REAL NOT NULL DEFAULT 0,
+            "tipo" INTEGER NOT NULL,
+            "ativo" BOOLEAN NOT NULL DEFAULT 1,
+            "id_supervisor" INTEGER NOT NULL,
+            "motivo_demissao" VARCHAR,
+            PRIMARY KEY("cpf")
+            );""")
+        
+        # Verificar se a tabela está vazia antes de inserir
+        cursor.execute("SELECT COUNT(*) as count FROM t_funcionario")
+        resultado = cursor.fetchone()
+        
+        if resultado['count'] == 0:
+            print("📝 Inserindo dados iniciais na tabela funcionarios...")
+            # Inserir dados iniciais apenas se a tabela estiver vazia
+            cursor.executescript("""
+                INSERT INTO "t_funcionario" (
+                    "cpf", 
+                    "nome", 
+                    "senha", 
+                    "email", 
+                    "data_nascimento", 
+                    "data_admissao",
+                    "salario", 
+                    "tipo", 
+                    "ativo", 
+                    "id_supervisor"
+                ) VALUES 
+                (
+                    '123.456.789-01', 
+                    'João Silva', 
+                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    'joao.silva@empresa.com', 
+                    '1985-03-15',
+                    '2020-01-10',
+                    3500.00, 
+                    1, 
+                    1, 
+                    0
+                ),
+                (
+                    '234.567.890-12', 
+                    'Maria Santos', 
+                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    'maria.santos@empresa.com', 
+                    '1990-07-22',
+                    '2021-03-20',
+                    4200.00, 
+                    1, 
+                    1, 
+                    1
+                ),
+                (
+                    '345.678.901-23', 
+                    'Pedro Oliveira', 
+                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    'pedro.oliveira@empresa.com', 
+                    '1988-11-30',
+                    '2019-08-05',
+                    2800.00, 
+                    2, 
+                    1, 
+                    1
+                ),
+                (
+                    '456.789.012-34', 
+                    'Ana Costa', 
+                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    'ana.costa@empresa.com', 
+                    '1992-05-18',
+                    '2022-02-14',
+                    3800.00, 
+                    1, 
+                    1, 
+                    1
+                ),
+                (
+                    '567.890.123-45', 
+                    'Carlos Lima', 
+                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    'carlos.lima@empresa.com', 
+                    '1987-12-03',
+                    '2020-11-08',
+                    3200.00, 
+                    2, 
+                    1, 
+                    1
+                ),
+                (
+                    '678.901.234-56', 
+                    'Juliana Pereira', 
+                    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/Lewd5g5Z5c1E5n5Ne',
+                    'juliana.pereira@empresa.com', 
+                    '1991-09-25',
+                    '2023-01-30',
+                    2900.00, 
+                    2, 
+                    1, 
+                    1
+                );
+            """)
+            conexao.commit()
+            print("✅ Dados iniciais inseridos com sucesso!")
         
         # t_ponto - salva os dados de ponto dos usuarios
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_ponto" (

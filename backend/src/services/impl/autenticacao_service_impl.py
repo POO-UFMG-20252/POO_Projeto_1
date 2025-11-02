@@ -1,4 +1,4 @@
-import jwt
+
 import bcrypt
 from datetime import datetime, timedelta
 from classes.custom_exception import CustomException

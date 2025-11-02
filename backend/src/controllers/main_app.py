@@ -1,16 +1,26 @@
 from flask import Flask
+from flask_cors import CORS
 
 class MainApp:
     def __init__(self, controllers):
         self.app = Flask(__name__)
-        self.controllers = controllers
-        self._registrar_controllers()
+        CORS(self.app)  # IMPORTANTE: Adicionar CORS
         
-    def _registrar_controllers(self):
-        for controller in self.controllers:
+        # Registrar rotas com debug
+        print("🎯 Registrando controllers...")
+        for controller in controllers:
+            print(f"   Registrando: {controller.__class__.__name__}")
             controller.registrar_rotas(self.app)
-        print("Registro de rotas concluído.")
         
-    def run(self, host='0.0.0.0', port=5000, debug=True):
-        print(f"Iniciando servidor em http://{host}:{port}")
-        self.app.run(host=host, port=port, debug=debug)
+        # Adicionar rota de health check
+        @self.app.route('/health')
+        def health():
+            return jsonify({"status": "ok", "message": "API está funcionando"})
+        
+        @self.app.route('/')
+        def home():
+            return jsonify({"message": "API Flask funcionando!"})
+
+    def run(self):
+        print("🌟 Iniciando servidor na porta 5000...")
+        self.app.run(debug=True, host='0.0.0.0', port=5000)
