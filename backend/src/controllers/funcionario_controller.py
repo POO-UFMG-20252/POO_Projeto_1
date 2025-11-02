@@ -6,7 +6,7 @@ from classes.custom_exception import CustomException
 
 class FuncionarioController():
     def __init__(self, funcionarioService: FuncionarioService):
-        self.funcionarioService = funcionarioService
+        self.funcionario_service = funcionarioService
         
     def registrar_rotas(self, app):
         app.add_url_rule('/funcionarios', 'listar_funcionarios', self.listar_funcionarios, methods=['GET'])
@@ -14,51 +14,42 @@ class FuncionarioController():
         
     def listar_funcionarios(self):
         try:
-            print("🟡 Recebida requisição para listar funcionários")
-            funcionarios = self.funcionarioService.listar_funcionarios()
-            print(f"🟢 Retornando {len(funcionarios)} funcionários")
+            funcionarios = self.funcionario_service.listar_funcionarios()
             return jsonify([funcionario.to_dict() for funcionario in funcionarios])
         except CustomException as e:
-            print(f"🔴 CustomException: {e}")
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
-            print(f"🔴 Erro inesperado no controller: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"Erro inesperado no ao listar funcionarios: {e}")
             return jsonify(ControllerError('Erro inesperado ao listar funcionários').to_dict()), 500
         
     def cadastrar_funcionario(self):
         try:
-            print("🟡 Recebida requisição para cadastrar funcionário")
             data = request.get_json()
             
             # Validações básicas
-            required_fields = ['nome', 'cpf', 'email', 'data_nascimento', 'salario', 'tipo']
+            required_fields = ['nome', 'cpf', 'email', 'senha', 'data_nascimento', 'salario', 'tipo']
             for field in required_fields:
                 if not data.get(field):
                     return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
             
             # Chamar o service para cadastrar
-            funcionario = self.funcionarioService.cadastrar_funcionario(
+            funcionario = self.funcionario_service.cadastrar_funcionario(
                 nome=data['nome'],
                 cpf=data['cpf'],
                 email=data['email'],
+                senha=data['senha'],
                 data_nascimento=data['data_nascimento'],
                 salario=data['salario'],
                 tipo=data['tipo']
             )
             
-            print(f"🟢 Funcionário cadastrado com sucesso: {funcionario.nome}")
             return jsonify({
                 'message': 'Funcionário cadastrado com sucesso',
                 'funcionario': funcionario.to_dict()
             }), 201
             
         except CustomException as e:
-            print(f"🔴 CustomException no cadastro: {e}")
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
-            print(f"🔴 Erro inesperado no cadastro: {e}")
-            import traceback
-            traceback.print_exc()
+            print(f"Erro inesperado no cadastro de funcionario: {e}")
             return jsonify(ControllerError('Erro inesperado ao cadastrar funcionário').to_dict()), 500

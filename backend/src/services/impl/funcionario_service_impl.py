@@ -96,7 +96,7 @@ class FuncionarioServiceImpl(FuncionarioService):
     def demitir(self, cpf_gerente: str, cpf_funcionario: str):
         pass
     
-    def cadastrar_funcionario(self, nome: str, cpf: str, senha: str, email: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
+    def cadastrar_funcionario(self, nome: str, cpf: str, email: str, senha: str, data_nascimento: str, salario: float, tipo: int) -> Funcionario:
         conexao = self.db_connection.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
