@@ -12,3 +12,7 @@ class PedidoService:
     @abstractmethod
     def remover_pedido(id:int):
         pass
+
+    @abstractmethod
+    def buscar_pedido(id : int):
+        pass

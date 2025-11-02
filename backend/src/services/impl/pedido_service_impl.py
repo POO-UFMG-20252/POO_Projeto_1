@@ -30,3 +30,11 @@ class PedidoServiceImpl(PedidoService):
         cursor.execute("DELETE FROM t_produto WHERE id =?",(id,))
         conexao_db.commit()
         conexao_db.close()
+
+    @staticmethod
+    def buscar_pedido(self,id:int):
+        conexao_db = self.banco_de_dados.get_connection()
+        cursor = conexao_db.cursor()
+        cursor.execute("SELECT id,id_responsavel,id_mercado,estado FROM t_pedido WHERE id =?",(id,))
+        result = cursor.fetchone()
+        return result

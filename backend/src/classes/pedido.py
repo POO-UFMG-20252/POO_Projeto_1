@@ -2,7 +2,7 @@ class Pedido():
     def __init__(self, id,id_responsavel,id_mercado,estado):
         self.id = id
         self.id_responsavel = id_responsavel
-        self.id_mercado = id_responsavel
+        self.id_mercado = id_mercado
         self.estado = estado
 
     #getters e setters id
