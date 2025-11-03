@@ -10,180 +10,167 @@ const EstoqueVisualizacao = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Configurações
+  // Configurações (agora vindo do backend)
   const [tamanhoArmazem, setTamanhoArmazem] = useState({ linhas: 5, colunas: 5 });
   const [tamanhoLoja, setTamanhoLoja] = useState({ linhas: 3, colunas: 3 });
   const [capacidadeMaxima, setCapacidadeMaxima] = useState(500);
 
-  // Função para buscar produtos do backend
-  const buscarProdutosBackend = async () => {
+  // Função para buscar dados completos do backend
+  const buscarDadosBackend = async () => {
     try {
       setLoading(true);
       setError(null);
       
       console.log('🔍 Buscando dados do backend...');
-      const response = await fetch('http://localhost:5000/api/estoque');
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const response = await fetch('http://localhost:5000/api/estoque/visualizacao', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Sessão expirada. Faça login novamente.');
+        }
         throw new Error(`Erro HTTP: ${response.status}`);
       }
       
       const dadosBackend = await response.json();
       console.log('✅ Dados recebidos do backend:', dadosBackend);
       
-      setProdutos(dadosBackend);
+      // Atualizar estados com dados do backend
+      setMatrizArmazem(dadosBackend.matrizArmazem || []);
+      setMatrizLoja(dadosBackend.matrizLoja || []);
+      setProdutos(dadosBackend.produtos || []);
+      setTamanhoArmazem(dadosBackend.tamanhoArmazem || { linhas: 5, colunas: 5 });
+      setTamanhoLoja(dadosBackend.tamanhoLoja || { linhas: 3, colunas: 3 });
+      setCapacidadeMaxima(dadosBackend.capacidadeMaxima || 500);
+      
       return dadosBackend;
       
     } catch (error) {
       console.error('❌ Erro ao buscar dados do backend:', error);
-      setError('Erro ao carregar dados do estoque. Verifique se o servidor está rodando.');
-      return [];
+      setError(error.message);
+      return null;
     } finally {
       setLoading(false);
     }
   };
 
-  // Função para inicializar matriz vazia
-  const inicializarMatrizVazia = (linhas, colunas, tipo) => {
-    const matriz = [];
-    for (let i = 0; i < linhas; i++) {
-      const linha = [];
-      for (let j = 0; j < colunas; j++) {
-        linha.push({
-          quantidade: 0,
-          porcentagem: 0,
-          linha: i,
-          coluna: j,
-          produto: null,
-          produtoId: null,
-          ocupada: false,
-          tipo: tipo
-        });
+  // Função para mover produto no backend
+  const moverProdutoBackend = async (idItem, novaPosX, novaPosY, novoLocal) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Usuário não autenticado');
       }
-      matriz.push(linha);
-    }
-    return matriz;
-  };
 
-  // Função para mapear produtos para as matrizes
-  const mapearProdutosParaMatrizes = (produtosList) => {
-    console.log('🗺️ Mapeando produtos para matrizes:', produtosList);
-    
-    // Inicializar matrizes vazias
-    const novaMatrizArmazem = inicializarMatrizVazia(tamanhoArmazem.linhas, tamanhoArmazem.colunas, 'armazem');
-    const novaMatrizLoja = inicializarMatrizVazia(tamanhoLoja.linhas, tamanhoLoja.colunas, 'loja');
-
-    // Preencher matrizes com produtos do backend
-    produtosList.forEach(produto => {
-      const { linha, coluna } = produto.posicao;
-      const porcentagem = (produto.quantidade / capacidadeMaxima) * 100;
+      const response = await fetch('http://localhost:5000/api/estoque/mover', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id_item: idItem,
+          novo_pos_x: novaPosX,
+          novo_pos_y: novaPosY,
+          novo_local: novoLocal
+        })
+      });
       
-      const celula = {
-        quantidade: produto.quantidade,
-        porcentagem: porcentagem,
-        linha: linha,
-        coluna: coluna,
-        produto: produto.nome,
-        produtoId: produto.id,
-        ocupada: true,
-        tipo: produto.localizacao
-      };
-
-      if (produto.localizacao === 'armazem' && linha < tamanhoArmazem.linhas && coluna < tamanhoArmazem.colunas) {
-        novaMatrizArmazem[linha][coluna] = celula;
-        console.log(`📍 Produto ${produto.nome} mapeado para armazém [${linha},${coluna}]`);
-      } else if (produto.localizacao === 'loja' && linha < tamanhoLoja.linhas && coluna < tamanhoLoja.colunas) {
-        novaMatrizLoja[linha][coluna] = celula;
-        console.log(`📍 Produto ${produto.nome} mapeado para loja [${linha},${coluna}]`);
-      } else {
-        console.warn(`⚠️ Produto ${produto.nome} fora dos limites da matriz:`, produto);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao mover produto');
       }
-    });
-
-    setMatrizArmazem(novaMatrizArmazem);
-    setMatrizLoja(novaMatrizLoja);
-    
-    console.log('✅ Matrizes atualizadas:', {
-      armazem: `${novaMatrizArmazem.length}x${novaMatrizArmazem[0]?.length || 0}`,
-      loja: `${novaMatrizLoja.length}x${novaMatrizLoja[0]?.length || 0}`,
-      produtosMapeados: produtosList.length
-    });
-  };
-
-  // Função para adicionar produto (agora enviaria para o backend)
-  const adicionarProdutoAleatorio = async () => {
-    const nomesProdutos = [
-      "Refrigerante Lata", "Água Mineral", "Suco Natural", "Energético", 
-      "Chá Gelado", "Refrigerante 2L", "Cerveja", "Água com Gás", 
-      "Suco de Laranja", "Refrigerante Guaraná"
-    ];
-    
-    // Encontrar posição vazia no armazém
-    let posicaoEncontrada = false;
-    let linha, coluna;
-    
-    while (!posicaoEncontrada) {
-      linha = Math.floor(Math.random() * tamanhoArmazem.linhas);
-      coluna = Math.floor(Math.random() * tamanhoArmazem.colunas);
       
-      const celula = matrizArmazem[linha]?.[coluna];
-      if (!celula?.ocupada) {
-        posicaoEncontrada = true;
-      }
+      const resultado = await response.json();
+      console.log('✅ Produto movido com sucesso:', resultado);
+      
+      // Recarregar dados após mover
+      await buscarDadosBackend();
+      return true;
+      
+    } catch (error) {
+      console.error('❌ Erro ao mover produto:', error);
+      alert(`Erro ao mover produto: ${error.message}`);
+      return false;
     }
-
-    const novoProduto = {
-      nome: nomesProdutos[Math.floor(Math.random() * nomesProdutos.length)],
-      quantidade: Math.floor(Math.random() * capacidadeMaxima) + 1,
-      localizacao: 'armazem',
-      linha: linha,
-      coluna: coluna
-    };
-
-    // Aqui você faria uma requisição POST para o backend
-    console.log('📤 Simulando envio para backend:', novoProduto);
-    
-    // Por enquanto, apenas atualiza o estado local
-    const produtoComId = {
-      ...novoProduto,
-      id: Date.now(), // ID temporário
-      posicao: { linha, coluna }
-    };
-    
-    const novosProdutos = [...produtos, produtoComId];
-    setProdutos(novosProdutos);
-    mapearProdutosParaMatrizes(novosProdutos);
   };
 
-  // Função para mover produto (também enviaria para o backend)
-  const moverProduto = (produtoId, novaLocalizacao, novaPosicao) => {
-    const novosProdutos = produtos.map(produto => {
-      if (produto.id === produtoId) {
-        const produtoAtualizado = {
-          ...produto,
-          localizacao: novaLocalizacao,
-          posicao: novaPosicao
-        };
-        
-        // Aqui você faria uma requisição PUT para o backend
-        console.log('📤 Simulando atualização no backend:', produtoAtualizado);
-        
-        return produtoAtualizado;
+  // Função para remover produto no backend
+  const removerProdutoBackend = async (idItem) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Usuário não autenticado');
       }
-      return produto;
-    });
 
-    setProdutos(novosProdutos);
-    mapearProdutosParaMatrizes(novosProdutos);
-    setProdutoSelecionado(null);
-    setModoMovimento(false);
+      const response = await fetch(`http://localhost:5000/api/estoque/remover/${idItem}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao remover produto');
+      }
+      
+      const resultado = await response.json();
+      console.log('✅ Produto removido com sucesso:', resultado);
+      
+      // Recarregar dados após remover
+      await buscarDadosBackend();
+      return true;
+      
+    } catch (error) {
+      console.error('❌ Erro ao remover produto:', error);
+      alert(`Erro ao remover produto: ${error.message}`);
+      return false;
+    }
   };
 
   // Função para selecionar produto para movimento
   const selecionarProdutoParaMovimento = (produtoId, localizacaoAtual) => {
-    const produto = produtos.find(p => p.id === produtoId);
-    setProdutoSelecionado(produto);
-    setModoMovimento(true);
+    // Encontrar o item correto baseado no produtoId e localização
+    let itemEncontrado = null;
+    
+    // Buscar nas matrizes
+    const todasCelulas = [...matrizArmazem.flat(), ...matrizLoja.flat()];
+    const celula = todasCelulas.find(cel => 
+      cel.ocupada && cel.produtoId === produtoId && cel.local === localizacaoAtual
+    );
+    
+    if (celula) {
+      itemEncontrado = {
+        id: celula.produtoId,
+        nome: celula.produto,
+        quantidade: celula.quantidade,
+        localizacao: celula.local,
+        posicao: { linha: celula.linha, coluna: celula.coluna },
+        // Precisamos do ID do item (não do produto) para a movimentação
+        itemId: celula.id || produtoId // Usar ID da célula se disponível
+      };
+    }
+    
+    if (itemEncontrado) {
+      setProdutoSelecionado(itemEncontrado);
+      setModoMovimento(true);
+      console.log('📦 Produto selecionado para movimento:', itemEncontrado);
+    } else {
+      console.error('❌ Produto não encontrado para movimento:', { produtoId, localizacaoAtual });
+    }
   };
 
   // Função para cancelar movimento
@@ -193,54 +180,81 @@ const EstoqueVisualizacao = () => {
   };
 
   // Função para lidar com clique na célula (quando em modo movimento)
-  const handleCliqueCelula = (linha, coluna, tipoMatriz) => {
+  const handleCliqueCelula = async (linha, coluna, tipoMatriz) => {
     if (!modoMovimento || !produtoSelecionado) return;
+
+    // Não permitir mover para o mesmo local
+    if (tipoMatriz === produtoSelecionado.localizacao) {
+      alert('Selecione uma célula no outro local (Armazém ↔ Loja)');
+      return;
+    }
 
     // Verificar se a célula de destino está vazia
     const matrizDestino = tipoMatriz === 'armazem' ? matrizArmazem : matrizLoja;
     
-    if (matrizDestino[linha][coluna].ocupada) {
+    if (matrizDestino[linha] && matrizDestino[linha][coluna] && matrizDestino[linha][coluna].ocupada) {
       alert('Célula de destino já está ocupada!');
       return;
     }
 
-    // Mover o produto
-    moverProduto(produtoSelecionado.id, tipoMatriz, { linha, coluna });
+    console.log('🚚 Movendo produto:', {
+      de: produtoSelecionado.localizacao,
+      para: tipoMatriz,
+      posicao: { linha, coluna },
+      produto: produtoSelecionado
+    });
+
+    // Mover o produto no backend
+    const sucesso = await moverProdutoBackend(
+      produtoSelecionado.itemId || produtoSelecionado.id,
+      linha,
+      coluna,
+      tipoMatriz
+    );
+
+    if (sucesso) {
+      setProdutoSelecionado(null);
+      setModoMovimento(false);
+    }
   };
 
-  // Função para remover produto (também enviaria para o backend)
-  const removerProduto = (produtoId) => {
-    // Aqui você faria uma requisição DELETE para o backend
-    console.log('🗑️ Simulando remoção no backend do produto:', produtoId);
+  // Função para remover produto
+  const removerProduto = async (produtoId) => {
+    if (!window.confirm('Tem certeza que deseja remover este produto?')) {
+      return;
+    }
+
+    console.log('🗑️ Removendo produto:', produtoId);
     
-    const novosProdutos = produtos.filter(produto => produto.id !== produtoId);
-    setProdutos(novosProdutos);
-    mapearProdutosParaMatrizes(novosProdutos);
-    setProdutoSelecionado(null);
-    setModoMovimento(false);
+    // Encontrar o ID do item (não do produto)
+    let itemId = produtoId;
+    
+    // Buscar nas matrizes para encontrar o ID correto do item
+    const todasCelulas = [...matrizArmazem.flat(), ...matrizLoja.flat()];
+    const celula = todasCelulas.find(cel => 
+      cel.ocupada && cel.produtoId === produtoId
+    );
+    
+    if (celula && celula.id) {
+      itemId = celula.id;
+    }
+
+    const sucesso = await removerProdutoBackend(itemId);
+    
+    if (sucesso) {
+      setProdutoSelecionado(null);
+      setModoMovimento(false);
+    }
   };
 
   // Carregar dados do backend quando o componente montar
   useEffect(() => {
-    const carregarDados = async () => {
-      const produtosBackend = await buscarProdutosBackend();
-      mapearProdutosParaMatrizes(produtosBackend);
-    };
-    
-    carregarDados();
+    buscarDadosBackend();
   }, []);
-
-  // Atualizar matrizes quando configurações mudarem
-  useEffect(() => {
-    if (produtos.length > 0) {
-      mapearProdutosParaMatrizes(produtos);
-    }
-  }, [tamanhoArmazem, tamanhoLoja, capacidadeMaxima]);
 
   // Função para recarregar dados
   const recarregarDados = async () => {
-    const produtosBackend = await buscarProdutosBackend();
-    mapearProdutosParaMatrizes(produtosBackend);
+    await buscarDadosBackend();
   };
 
   // Função para determinar a cor baseada na porcentagem
@@ -255,6 +269,15 @@ const EstoqueVisualizacao = () => {
 
   // Componente de Matriz
   const Matriz = ({ matriz, titulo, tipo }) => {
+    if (!matriz || matriz.length === 0) {
+      return (
+        <div className="matriz-section">
+          <h3>{titulo}</h3>
+          <div className="matriz-vazia">Carregando...</div>
+        </div>
+      );
+    }
+
     return (
       <div className="matriz-section">
         <h3>{titulo} ({matriz.length}x{matriz[0]?.length || 0})</h3>
@@ -366,7 +389,7 @@ const EstoqueVisualizacao = () => {
             ({produtoSelecionado.quantidade} unidades) de {produtoSelecionado.localizacao === 'armazem' ? 'Armazém' : 'Loja'}
           </div>
           <div className="movimento-acoes">
-            <span>Clique em uma célula vazia para mover o produto</span>
+            <span>Clique em uma célula vazia no {produtoSelecionado.localizacao === 'armazem' ? 'Loja' : 'Armazém'} para mover o produto</span>
             <button onClick={cancelarMovimento} className="btn-cancelar">
               ❌ Cancelar
             </button>
@@ -376,20 +399,6 @@ const EstoqueVisualizacao = () => {
 
       {/* Controles */}
       <div className="controles">
-        <div className="controle-grupo">
-          <label>Capacidade Máxima:</label>
-          <input
-            type="number"
-            min="1"
-            value={capacidadeMaxima}
-            onChange={(e) => setCapacidadeMaxima(parseInt(e.target.value) || 500)}
-          />
-        </div>
-        
-        <button onClick={adicionarProdutoAleatorio} className="btn-adicionar">
-          + Adicionar Produto no Armazém
-        </button>
-
         {produtoSelecionado && !modoMovimento && (
           <div className="controle-selecionado">
             <span>Produto selecionado: {produtoSelecionado.nome}</span>
@@ -464,7 +473,7 @@ const EstoqueVisualizacao = () => {
                 <div>Quantidade: {produto.quantidade} unidades</div>
                 <div>
                   Local: {produto.localizacao === 'armazem' ? '🏭 Armazém' : '🏪 Loja'} 
-                  - Posição: {produto.posicao.linha},{produto.posicao.coluna}
+                  {produto.posicao && ` - Posição: ${produto.posicao.linha},${produto.posicao.coluna}`}
                 </div>
                 <div>Ocupação: {((produto.quantidade / capacidadeMaxima) * 100).toFixed(1)}%</div>
               </div>
@@ -499,7 +508,7 @@ const EstoqueVisualizacao = () => {
           <strong> Loja:</strong> {tamanhoLoja.linhas}×{tamanhoLoja.colunas}
         </p>
         <p className="backend-info">
-          <strong>🔗 Conectado ao Backend:</strong> Dados carregados do servidor Flask
+          <strong>🔗 Conectado ao Backend:</strong> Dados em tempo real do banco de dados
         </p>
       </div>
     </div>

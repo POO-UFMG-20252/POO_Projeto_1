@@ -171,7 +171,6 @@ const CadastroFuncionario = () => {
         console.log('Resposta da API:', data);
         setSubmitted(true);
         
-        // Limpa o formulário após 3 segundos
         setTimeout(() => {
           setFormData({
             nome: '',

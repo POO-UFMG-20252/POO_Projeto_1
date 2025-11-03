@@ -7,7 +7,7 @@ class MainApp:
         CORS(self.app)  # IMPORTANTE: Adicionar CORS
         
         # Registrar rotas com debug
-        print("🎯 Registrando controllers...")
+        print("Registrando controllers...")
         for controller in controllers:
             print(f"   Registrando: {controller.__class__.__name__}")
             controller.registrar_rotas(self.app)
@@ -22,5 +22,5 @@ class MainApp:
             return jsonify({"message": "API Flask funcionando!"})
 
     def run(self):
-        print("🌟 Iniciando servidor na porta 5000...")
+        print("Iniciando servidor na porta 5000...")
         self.app.run(debug=True, host='0.0.0.0', port=5000)

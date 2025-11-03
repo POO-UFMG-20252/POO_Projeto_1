@@ -225,12 +225,15 @@ class DatabaseConnection:
                 );""")
         
         #t_vendas - salva dados de vendas
-        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_vendas" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "id_responsavel" INTEGER NOT NULL,
-                "time" INTEGER NOT NULL,
-                PRIMARY KEY("id")
-                );""")
+        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS t_vendas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_produto INTEGER NOT NULL,
+        quantidade INTEGER NOT NULL,
+        data_venda DATETIME DEFAULT CURRENT_TIMESTAMP,
+        total REAL NOT NULL,
+        codigo_pix VARCHAR(50) UNIQUE,
+        FOREIGN KEY (id_produto) REFERENCES t_produto(id)
+        );""")
         
         #t_vendas_produtos - salva os produtos do mercado que foram vendidos 
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_vendas_produtos" (
