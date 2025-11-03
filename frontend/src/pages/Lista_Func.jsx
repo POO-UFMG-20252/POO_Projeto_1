@@ -5,20 +5,17 @@ const EventosLista = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Carregar funcionários da API real
     useEffect(() => {
         const carregarFuncionarios = async () => {
             try {
                 setLoading(true);
                 setError(null);
                 
-                // Substitua pela URL da sua API
                 const response = await fetch('http://localhost:5000/funcionarios', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        // Se precisar de autenticação, adicione o token
-                        // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+
                     }
                 });
 

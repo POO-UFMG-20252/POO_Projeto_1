@@ -1,32 +1,128 @@
-from flask import Blueprint, jsonify
-
-from classes.contoller_error import ControllerError
-from controllers.controller import Controller
-from services.autenticacao_service import AutenticacaoService
+from flask import Blueprint, request, jsonify
 from services.estoque_service import EstoqueService
+from classes.contoller_error import ControllerError
+from classes.custom_exception import CustomException
 
-class EstoqueController(Controller):
-    def __init__(self, nome: str, estoqueService: EstoqueService, autenticacaoService: AutenticacaoService):
-        super().__init__(nome, autenticacaoService)
-        self.estoque_service = estoqueService
-
-    def registrar_rotas(self, app):
-        app.add_url_rule('/api/estoque', 'buscar_estoque', self.get_estoque, methods=['GET'])
-        app.add_url_rule('/api/estoque/<int:item_id>', 'buscar_produto_estoque', self.get_item_estoque, methods=['GET'])
-
-    def get_estoque(self):
-        try:
-            itens = self.estoque_service.buscar_todos_itens()
-            return jsonify(itens)
-        except Exception as e:
-            print(f"Erro ao consultar estoque: {e}")
-            return jsonify(ControllerError('Erro inesperado ao consultar estoque').to_dict()), 500
+class EstoqueController:
+    def __init__(self, estoqueService: EstoqueService):
+        self.estoqueService = estoqueService
         
-    def get_item_estoque(self, item_id):
+    def registrar_rotas(self, app):
+        app.add_url_rule('/api/estoque/visualizacao', 'obter_visualizacao_estoque', self.obter_visualizacao_estoque, methods=['GET'])
+        app.add_url_rule('/api/estoque/mover', 'mover_produto', self.mover_produto, methods=['POST'])
+        app.add_url_rule('/api/estoque/adicionar', 'adicionar_produto', self.adicionar_produto, methods=['POST'])
+        app.add_url_rule('/api/estoque/remover/<int:id_item>', 'remover_produto', self.remover_produto, methods=['DELETE'])
+        app.add_url_rule('/api/estoque/produtos', 'listar_produtos', self.listar_produtos, methods=['GET'])
+        
+    def obter_visualizacao_estoque(self):
         try:
-            item = self.estoque_service.buscar_item_por_id(item_id)
-            if item:
-                return jsonify(item)
-            return jsonify(ControllerError('Item não encontrado')), 404
+            usuario = self.auth_utils.get_usuario_logado()
+            if not usuario:
+                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            
+            dados_estoque = self.estoqueService.obter_visualizacao_estoque()
+            return jsonify(dados_estoque)
+            
+        except CustomException as e:
+            return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
-            return jsonify(ControllerError('Erro inesperado ao consultar item do estoque').to_dict()), 500
+            print(f"Erro inesperado: {e}")
+            import traceback
+            traceback.print_exc()
+            return jsonify(ControllerError('Erro inesperado ao carregar estoque').to_dict()), 500
+    
+    def mover_produto(self):
+        try:
+            usuario = self.auth_utils.get_usuario_logado()
+            if not usuario:
+                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            
+            data = request.get_json()
+            required_fields = ['id_item', 'novo_pos_x', 'novo_pos_y', 'novo_local']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
+            
+            sucesso = self.estoqueService.mover_produto(
+                data['id_item'],
+                data['novo_pos_x'],
+                data['novo_pos_y'],
+                data['novo_local']
+            )
+            
+            if sucesso:
+                return jsonify({'message': 'Produto movido com sucesso'})
+            else:
+                return jsonify(ControllerError('Erro ao mover produto').to_dict()), 400
+                
+        except CustomException as e:
+            return jsonify(ControllerError.de_excecao(e).to_dict()), 400
+        except Exception as e:
+            print(f"Erro ao mover produto: {e}")
+            return jsonify(ControllerError('Erro inesperado ao mover produto').to_dict()), 500
+    
+    def adicionar_produto(self):
+        try:
+            usuario = self.auth_utils.get_usuario_logado()
+            if not usuario:
+                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            
+            data = request.get_json()
+            required_fields = ['id_produto', 'pos_x', 'pos_y', 'quantidade', 'local']
+            for field in required_fields:
+                if field not in data:
+                    return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
+            
+            sucesso = self.estoqueService.adicionar_produto(
+                data['id_produto'],
+                1,  # id_mercado padrão
+                data['pos_x'],
+                data['pos_y'],
+                data['quantidade'],
+                data['local']
+            )
+            
+            if sucesso:
+                return jsonify({'message': 'Produto adicionado com sucesso'})
+            else:
+                return jsonify(ControllerError('Erro ao adicionar produto').to_dict()), 400
+                
+        except CustomException as e:
+            return jsonify(ControllerError.de_excecao(e).to_dict()), 400
+        except Exception as e:
+            print(f"Erro ao adicionar produto: {e}")
+            return jsonify(ControllerError('Erro inesperado ao adicionar produto').to_dict()), 500
+    
+    def remover_produto(self, id_item):
+        try:
+            usuario = self.auth_utils.get_usuario_logado()
+            if not usuario:
+                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            
+            sucesso = self.estoqueService.remover_produto(id_item)
+            
+            if sucesso:
+                return jsonify({'message': 'Produto removido com sucesso'})
+            else:
+                return jsonify(ControllerError('Produto não encontrado').to_dict()), 404
+                
+        except CustomException as e:
+            return jsonify(ControllerError.de_excecao(e).to_dict()), 400
+        except Exception as e:
+            print(f"Erro ao remover produto: {e}")
+            return jsonify(ControllerError('Erro inesperado ao remover produto').to_dict()), 500
+    
+    def listar_produtos(self):
+        try:
+            usuario = self.auth_utils.get_usuario_logado()
+            if not usuario:
+                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            
+            produtos = self.estoqueService.listar_produtos()
+            return jsonify([produto.to_dict() for produto in produtos])
+            
+        except CustomException as e:
+            return jsonify(ControllerError.de_excecao(e).to_dict()), 400
+        except Exception as e:
+            print(f"Erro ao listar produtos: {e}")
+            return jsonify(ControllerError('Erro inesperado ao listar produtos').to_dict()), 500

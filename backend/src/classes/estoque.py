@@ -1,59 +1,98 @@
-class Estoque:
-    def __init__(self, id, nome, quantidade, localizacao, linha, coluna):
-        self.id = id
-        self.nome = nome
-        self.quantidade = quantidade
-        self.localizacao = localizacao
-        self.posicao = {
-            'linha': linha,
-            'coluna': coluna
-        }
+class ItemEstoque:
+    def __init__(self, id: int, id_produto: int, id_mercado: int, pos_x: int, pos_y: int, 
+                 quantidade: int, produto_nome: str = "", local: str = "armazem"):
+        self._id = id
+        self._id_produto = id_produto
+        self._id_mercado = id_mercado
+        self._pos_x = pos_x
+        self._pos_y = pos_y
+        self._quantidade = quantidade
+        self._produto_nome = produto_nome
+        self._local = local
+    
+    # Getters e setters
+    @property
+    def id(self):
+        return self._id
+    
+    @id.setter
+    def id(self, id_novo):
+        self._id = id_novo
+    
+    @property
+    def id_produto(self):
+        return self._id_produto
+    
+    @id_produto.setter
+    def id_produto(self, id_produto_novo):
+        self._id_produto = id_produto_novo
+    
+    @property
+    def id_mercado(self):
+        return self._id_mercado
+    
+    @id_mercado.setter
+    def id_mercado(self, id_mercado_novo):
+        self._id_mercado = id_mercado_novo
+    
+    @property
+    def pos_x(self):
+        return self._pos_x
+    
+    @pos_x.setter
+    def pos_x(self, pos_x_novo):
+        self._pos_x = pos_x_novo
+    
+    @property
+    def pos_y(self):
+        return self._pos_y
+    
+    @pos_y.setter
+    def pos_y(self, pos_y_novo):
+        self._pos_y = pos_y_novo
+    
+    @property
+    def quantidade(self):
+        return self._quantidade
+    
+    @quantidade.setter
+    def quantidade(self, quantidade_nova):
+        if quantidade_nova < 0:
+            raise ValueError("Quantidade não pode ser negativa")
+        self._quantidade = quantidade_nova
+    
+    @property
+    def produto_nome(self):
+        return self._produto_nome
+    
+    @produto_nome.setter
+    def produto_nome(self, produto_nome_novo):
+        self._produto_nome = produto_nome_novo
+    
+    @property
+    def local(self):
+        return self._local
+    
+    @local.setter
+    def local(self, local_novo):
+        if local_novo not in ['armazem', 'loja']:
+            raise ValueError("Local deve ser 'armazem' ou 'loja'")
+        self._local = local_novo
     
     def to_dict(self):
-        """Converte o objeto para dicionário"""
         return {
             'id': self.id,
-            'nome': self.nome,
+            'id_produto': self.id_produto,
+            'id_mercado': self.id_mercado,
+            'pos_x': self.pos_x,
+            'pos_y': self.pos_y,
             'quantidade': self.quantidade,
-            'localizacao': self.localizacao,
-            'posicao': self.posicao
+            'produto_nome': self.produto_nome,
+            'local': self.local
         }
-
-class GerenciadorEstoque:
-    def __init__(self, db_connection):
-        self.db = db_connection
-        print("✅ GerenciadorEstoque instanciado!")
     
-    def buscar_todos_itens(self):
-        """Busca todos os itens do estoque"""
-        print("🔍 Buscando todos os itens no banco...")
-        conn = self.db.get_connection()
-        if conn is None:
-            print("❌ Conexão com banco falhou!")
-            return []
-        
-        try:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM estoque")
-            rows = cursor.fetchall()
-            print(f"📋 Número de registros no banco: {len(rows)}")
-            
-            itens = []
-            for row in rows:
-                item = Estoque(
-                    id=row['id'],
-                    nome=row['nome'],
-                    quantidade=row['quantidade'],
-                    localizacao=row['localizacao'],
-                    linha=row['linha'],
-                    coluna=row['coluna']
-                )
-                itens.append(item.to_dict())
-            
-            print(f"✅ Itens convertidos: {len(itens)}")
-            return itens
-        except Exception as e:
-            print(f"❌ Erro ao buscar itens: {e}")
-            return []
-        finally:
-            conn.close()
+    def __str__(self):
+        return f"ItemEstoque(id={self.id}, produto='{self.produto_nome}', quantidade={self.quantidade}, local={self.local}, posição=({self.pos_x},{self.pos_y}))"
+    
+    def __repr__(self):
+        return self.__str__()
