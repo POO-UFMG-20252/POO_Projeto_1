@@ -12,10 +12,11 @@ class CaixaController(Controller):
         
     def registrar_rotas(self, app):
         app.add_url_rule('/api/caixa/venda/processar', 'processar_venda', self.processar_venda, methods=['POST'])
-        app.add_url_rule('/api/caixa/produtos/<int:id_produto>', 'obter_produto', self.obter_produto, methods=['GET'])
-            
+    
     def processar_venda(self):
         try:
+            usuario = super()._get_usuario_logado(request, [0, 1])
+
             usuario = self.auth_utils.get_usuario_logado()
             if not usuario:
                 return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
@@ -54,18 +55,3 @@ class CaixaController(Controller):
             import traceback
             traceback.print_exc()
             return jsonify(ControllerError('Erro inesperado ao processar venda').to_dict()), 500
-    
-    def obter_produto(self, id_produto):
-        try:
-            usuario = self.auth_utils.get_usuario_logado()
-            if not usuario:
-                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
-            
-            produto = self.caixaService.obter_produto_por_id(id_produto)
-            return jsonify(produto.to_dict())
-            
-        except CustomException as e:
-            return jsonify(ControllerError.de_excecao(e).to_dict()), 404
-        except Exception as e:
-            print(f"Erro ao obter produto: {e}")
-            return jsonify(ControllerError('Erro inesperado ao obter produto').to_dict()), 500

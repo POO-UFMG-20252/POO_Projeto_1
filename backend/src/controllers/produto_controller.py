@@ -21,6 +21,8 @@ class ProdutoController(Controller):
         
     def adicionar_produto(self):
         try:
+            usuario = self._get_usuario_logado(request, [0, 1, 2])
+            
             data = request.get_json()
             required_fields = ['nome', 'marca', 'preco']
             for field in required_fields:
@@ -46,6 +48,8 @@ class ProdutoController(Controller):
         
     def editar_produto(self):
         try:
+            usuario = self._get_usuario_logado(request, [0, 1, 2])
+            
             data = request.get_json()
             required_fields = ['id', 'nome', 'marca', 'preco']
             for field in required_fields:
@@ -72,6 +76,8 @@ class ProdutoController(Controller):
     
     def remover_produto(self, id: int):
         try:
+            usuario = self._get_usuario_logado(request, [0, 1, 2])
+            
             if not id:
                 raise(CustomException("Id inválido"))
             
@@ -84,6 +90,8 @@ class ProdutoController(Controller):
     
     def busca_geral_produto(self):
         try:
+            usuario = self._get_usuario_logado(request, [0, 1, 2])
+            
             return jsonify(self.produto_service.busca_geral_produto()), 200
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
@@ -93,6 +101,8 @@ class ProdutoController(Controller):
 
     def buscar_produto(self, id):
         try:
+            usuario = self._get_usuario_logado(request, [0, 1, 2])
+            
             if not id:
                 raise(CustomException("Id inválido"))
 
@@ -105,6 +115,8 @@ class ProdutoController(Controller):
         
     def buscar_produto_por_nome(self):
         try:
+            usuario = self._get_usuario_logado(request, [0, 1, 2])
+            
             usuario = self.auth_utils.get_usuario_logado()
             if not usuario:
                 return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
@@ -122,4 +134,4 @@ class ProdutoController(Controller):
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
             print(f"Erro inesperado ao buscar produtos por nome: {e}")
-            return jsonify(ControllerError('Erro inesperado ao buscar produtos').to_dict()), 500E
+            return jsonify(ControllerError('Erro inesperado ao buscar produtos').to_dict()), 500

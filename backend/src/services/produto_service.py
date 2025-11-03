@@ -5,20 +5,25 @@ from typing import List
 
 class ProdutoService:
     @abstractmethod
-    def adicionar_produto(nome: str, marca: str, preco: float) -> Produto:
+    def adicionar_produto(self, nome: str, marca: str, preco: float) -> Produto:
         pass
+    
     @abstractmethod
-    def editar_produto(id: int, nome: str, marca: str) -> Produto:
+    def editar_produto(self, id: int, nome: str, marca: str) -> Produto:
         pass
+    
     @abstractmethod
-    def remover_produto(id: int) -> Produto:
+    def remover_produto(self, id: int) -> Produto:
         pass
+    
     @abstractmethod
-    def busca_geral_produto() -> list[Produto]:
+    def busca_geral_produto(self, ) -> list[Produto]:
         pass
+    
     @abstractmethod
-    def busca_produto(int:id) -> Produto:
+    def busca_produto(self, int:id) -> Produto:
         pass
+    
     @abstractmethod
     def buscar_produtos_por_nome(self, termo: str) -> List[Produto]:
         pass

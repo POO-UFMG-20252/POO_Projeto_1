@@ -11,41 +11,6 @@ class CaixaServiceImpl(CaixaService):
     def __init__(self, database_connection: DatabaseConnection):
         self.__banco_de_dados = database_connection
     
-    def obter_produto_por_id(self, id_produto: int) -> Produto:
-        conexao = self.__banco_de_dados.get_connection()
-        if not conexao:
-            raise CustomException("Erro ao conectar com o banco de dados")
-            
-        try:
-            cursor = conexao.cursor()
-            
-            cursor.execute("""
-                SELECT id, nome, marca, preco 
-                FROM t_produto 
-                WHERE id = ?
-            """, (id_produto,))
-            
-            resultado = cursor.fetchone()
-            
-            if not resultado:
-                raise CustomException("Produto não encontrado")
-            
-            return Produto(
-                id=resultado['id'],
-                nome=resultado['nome'],
-                marca=resultado['marca'],
-                preco=resultado['preco'] or 0.0
-            )
-            
-        except CustomException as e:
-            raise e
-        except Exception as e:
-            print(f"Erro ao buscar produto: {e}")
-            raise CustomException("Erro ao buscar produto")
-        finally:
-            if conexao:
-                conexao.close()
-    
     def _gerar_codigo_pix(self):
         """Gera um código PIX aleatório"""
         caracteres = string.ascii_uppercase + string.digits
@@ -74,7 +39,7 @@ class CaixaServiceImpl(CaixaService):
                 # Buscar itens em estoque ordenados por local (loja primeiro, depois armazém)
                 cursor.execute("""
                     SELECT id, quantidade, local 
-                    FROM t_estoque_armazem 
+                    FROM t_estoque 
                     WHERE id_produto = ? AND quantidade > 0
                     ORDER BY local DESC, id ASC
                 """, (id_produto,))
@@ -107,11 +72,11 @@ class CaixaServiceImpl(CaixaService):
                     
                     if nova_quantidade == 0:
                         # Se zerou o estoque, remove o item
-                        cursor.execute("DELETE FROM t_estoque_armazem WHERE id = ?", (id_item_estoque,))
+                        cursor.execute("DELETE FROM t_estoque WHERE id = ?", (id_item_estoque,))
                         print(f"Item {id_item_estoque} removido do estoque (quantidade zerada)")
                     else:
                         # Atualiza a quantidade
-                        cursor.execute("UPDATE t_estoque_armazem SET quantidade = ? WHERE id = ?", 
+                        cursor.execute("UPDATE t_estoque SET quantidade = ? WHERE id = ?", 
                                      (nova_quantidade, id_item_estoque))
                         print(f"Item {id_item_estoque} atualizado: {quantidade_disponivel} → {nova_quantidade}")
                     

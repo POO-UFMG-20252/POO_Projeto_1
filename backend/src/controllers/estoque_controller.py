@@ -19,13 +19,10 @@ class EstoqueController(Controller):
         
     def obter_visualizacao_estoque(self):
         try:
-            usuario = self.auth_utils.get_usuario_logado()
-            if not usuario:
-                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            usuario = super()._get_usuario_logado(request, [0, 2])
             
             dados_estoque = self.estoqueService.obter_visualizacao_estoque()
             return jsonify(dados_estoque)
-            
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
@@ -36,10 +33,8 @@ class EstoqueController(Controller):
     
     def mover_produto(self):
         try:
-            usuario = self.auth_utils.get_usuario_logado()
-            if not usuario:
-                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
-            
+            usuario = super()._get_usuario_logado(request, [0, 2])      
+
             data = request.get_json()
             required_fields = ['id_item', 'novo_pos_x', 'novo_pos_y', 'novo_local']
             for field in required_fields:
@@ -57,7 +52,6 @@ class EstoqueController(Controller):
                 return jsonify({'message': 'Produto movido com sucesso'})
             else:
                 return jsonify(ControllerError('Erro ao mover produto').to_dict()), 400
-                
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
@@ -66,9 +60,7 @@ class EstoqueController(Controller):
     
     def adicionar_produto_no_estoque(self):
         try:
-            usuario = self.auth_utils.get_usuario_logado()
-            if not usuario:
-                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            usuario = super()._get_usuario_logado(request, [0, 2])
             
             data = request.get_json()
             required_fields = ['id_produto', 'pos_x', 'pos_y', 'quantidade', 'local']
@@ -78,7 +70,6 @@ class EstoqueController(Controller):
             
             sucesso = self.estoqueService.adicionar_produto(
                 data['id_produto'],
-                1,  # id_mercado padrão
                 data['pos_x'],
                 data['pos_y'],
                 data['quantidade'],
@@ -89,7 +80,6 @@ class EstoqueController(Controller):
                 return jsonify({'message': 'Produto adicionado com sucesso'})
             else:
                 return jsonify(ControllerError('Erro ao adicionar produto').to_dict()), 400
-                
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
@@ -98,9 +88,7 @@ class EstoqueController(Controller):
     
     def remover_produto_do_estoque(self, id_item):
         try:
-            usuario = self.auth_utils.get_usuario_logado()
-            if not usuario:
-                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            usuario = super()._get_usuario_logado(request, [0, 2])            
             
             sucesso = self.estoqueService.remover_produto(id_item)
             
@@ -108,7 +96,6 @@ class EstoqueController(Controller):
                 return jsonify({'message': 'Produto removido com sucesso'})
             else:
                 return jsonify(ControllerError('Produto não encontrado').to_dict()), 404
-                
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
@@ -117,13 +104,10 @@ class EstoqueController(Controller):
     
     def listar_produtos_do_estoque(self):
         try:
-            usuario = self.auth_utils.get_usuario_logado()
-            if not usuario:
-                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
+            usuario = super()._get_usuario_logado(request, [0, 2])
             
             produtos = self.estoqueService.listar_produtos()
             return jsonify([produto.to_dict() for produto in produtos])
-            
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:

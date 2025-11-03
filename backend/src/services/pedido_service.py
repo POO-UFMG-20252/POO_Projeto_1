@@ -4,17 +4,17 @@ from classes.pedido import Pedido
 
 class PedidoService:
     @abstractmethod
-    def criar_pedido(id_responsavel:KeyboardInterrupt, estado:int) -> Pedido:
+    def criar_pedido(self, id_responsavel: str, estado:int, lista_produtos: list[list[int]]) -> Pedido:
         pass
 
     @abstractmethod
-    def editar_pedido(id:int, estado:int) -> Pedido:
+    def editar_pedido(self, id:int, estado:int) -> Pedido:
         pass
 
     @abstractmethod
-    def remover_pedido(id:int) -> Pedido:
+    def remover_pedido(self, id:int) -> Pedido:
         pass
 
     @abstractmethod
-    def buscar_pedido(id : int) -> Pedido:
+    def buscar_pedido(self, id : int) -> Pedido:
         pass

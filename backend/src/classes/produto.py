@@ -1,48 +1,48 @@
 class Produto:
     def __init__(self, id: int, nome: str, marca: str = "", preco: float = 0.0):
-        self._id = id
-        self._nome = nome
-        self._marca = marca
-        self._preco = preco
+        self.__id = id
+        self.__nome = nome
+        self.__marca = marca
+        self.__preco = preco
     
     # Getters e setters nome
     @property
     def nome(self):
-        return self._nome
+        return self.__nome
     
     @nome.setter
     def nome(self, nome_novo):
-        self._nome = nome_novo
+        self.__nome = nome_novo
 
     # Getters e setters marca
     @property
     def marca(self):
-        return self._marca
+        return self.__marca
     
     @marca.setter
     def marca(self, marca_nova):
-        self._marca = marca_nova
+        self.__marca = marca_nova
     
     # Getter id
     @property
     def id(self):
-        return self._id
+        return self.__id
     
     # Setter id (opcional)
     @id.setter
     def id(self, id_novo):
-        self._id = id_novo
+        self.__id = id_novo
     
     # Getters e setters preco
     @property
     def preco(self):
-        return self._preco
+        return self.__preco
     
     @preco.setter
     def preco(self, preco_novo):
         if preco_novo < 0:
             raise ValueError("Preço não pode ser negativo")
-        self._preco = preco_novo
+        self.__preco = preco_novo
     
     def to_dict(self):
         return {

@@ -38,13 +38,13 @@ class EstoqueServiceImpl(EstoqueService):
             if conexao:
                 conexao.close()
     
-    def listar_estoque_armazem(self, id_mercado: int = 1) -> List[ItemEstoque]:
-        return self._listar_estoque_local(0, id_mercado)  # 0 = armazém
+    def listar_estoque_armazem(self) -> List[ItemEstoque]:
+        return self._listar_estoque_local(0)  # 0 = armazém
     
-    def listar_estoque_loja(self, id_mercado: int = 1) -> List[ItemEstoque]:
-        return self._listar_estoque_local(1, id_mercado)  # 1 = loja
+    def listar_estoque_loja(self ) -> List[ItemEstoque]:
+        return self._listar_estoque_local(1)  # 1 = loja
     
-    def _listar_estoque_local(self, local: int, id_mercado: int) -> List[ItemEstoque]:
+    def _listar_estoque_local(self, local: int) -> List[ItemEstoque]:
         conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
@@ -54,12 +54,12 @@ class EstoqueServiceImpl(EstoqueService):
             
             # Buscar todos os itens do local específico (0=armazém, 1=loja)
             cursor.execute("""
-                SELECT ea.id, ea.id_produto, ea.id_mercado, ea.pos_x, ea.pos_y, 
+                SELECT ea.id, ea.id_produto, ea.pos_x, ea.pos_y, 
                         ea.quantidade, ea.local, p.nome as produto_nome
-                FROM t_estoque_armazem ea
+                FROM t_estoque ea
                 JOIN t_produto p ON ea.id_produto = p.id
-                WHERE ea.id_mercado = ? AND ea.local = ?
-            """, (id_mercado, local))
+                AND ea.local = ?
+            """, (local,))
             
             resultados = cursor.fetchall()
             itens_estoque = []
@@ -71,7 +71,6 @@ class EstoqueServiceImpl(EstoqueService):
                 item = ItemEstoque(
                     id=resultado['id'],
                     id_produto=resultado['id_produto'],
-                    id_mercado=resultado['id_mercado'],
                     pos_x=resultado['pos_x'],
                     pos_y=resultado['pos_y'],
                     quantidade=resultado['quantidade'],
@@ -90,14 +89,14 @@ class EstoqueServiceImpl(EstoqueService):
             if conexao:
                 conexao.close()
     
-    def obter_visualizacao_estoque(self, id_mercado: int = 1) -> Dict[str, Any]:
+    def obter_visualizacao_estoque(self) -> Dict[str, Any]:
         try:
             # Obter produtos
             produtos = self.listar_produtos()
             
             # Obter estoque do armazém e loja
-            estoque_armazem = self.listar_estoque_armazem(id_mercado)
-            estoque_loja = self.listar_estoque_loja(id_mercado)
+            estoque_armazem = self.listar_estoque_armazem()
+            estoque_loja = self.listar_estoque_loja()
             
             # Configurações das matrizes 
             tamanho_armazem = {'linhas': 5, 'colunas': 5}
@@ -195,7 +194,7 @@ class EstoqueServiceImpl(EstoqueService):
             # Buscar o item atual
             cursor.execute("""
                 SELECT id_produto, quantidade, local, pos_x, pos_y 
-                FROM t_estoque_armazem 
+                FROM t_estoque
                 WHERE id = ?
             """, (id_item,))
             
@@ -213,8 +212,8 @@ class EstoqueServiceImpl(EstoqueService):
             # Verificar se a posição de destino está disponível
             if novo_local_num == 0:  # armazém
                 cursor.execute("""
-                    SELECT id FROM t_estoque_armazem 
-                    WHERE id_mercado = 1 AND local = 0 AND pos_x = ? AND pos_y = ? AND id != ?
+                    SELECT id FROM t_estoque 
+                    WHERE local = 0 AND pos_x = ? AND pos_y = ? AND id != ?
                 """, (novo_pos_x, novo_pos_y, id_item))
                 
                 if cursor.fetchone():
@@ -222,7 +221,7 @@ class EstoqueServiceImpl(EstoqueService):
             
             # Atualizar a posição e local do item
             cursor.execute("""
-                UPDATE t_estoque_armazem 
+                UPDATE t_estoque
                 SET pos_x = ?, pos_y = ?, local = ?
                 WHERE id = ?
             """, (novo_pos_x, novo_pos_y, novo_local_num, id_item))
@@ -239,7 +238,7 @@ class EstoqueServiceImpl(EstoqueService):
             if conexao:
                 conexao.close()
     
-    def adicionar_produto(self, id_produto: int, id_mercado: int, pos_x: int, pos_y: int, 
+    def adicionar_produto(self, id_produto: int, pos_x: int, pos_y: int, 
                          quantidade: int, local: str) -> bool:
         conexao = self.__banco_de_dados.get_connection()
         if not conexao:
@@ -253,17 +252,17 @@ class EstoqueServiceImpl(EstoqueService):
             
             # Verificar se posição está disponível
             cursor.execute("""
-                SELECT id FROM t_estoque_armazem 
-                WHERE id_mercado = ? AND local = ? AND pos_x = ? AND pos_y = ?
-            """, (id_mercado, local_num, pos_x, pos_y))
+                SELECT id FROM t_estoque
+                WHERE local = ? AND pos_x = ? AND pos_y = ?
+            """, (local_num, pos_x, pos_y))
             
             if cursor.fetchone():
                 raise CustomException("Posição já ocupada")
             
             cursor.execute("""
-                INSERT INTO t_estoque_armazem (id_produto, id_mercado, pos_x, pos_y, quantidade, local)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (id_produto, id_mercado, pos_x, pos_y, quantidade, local_num))
+                INSERT INTO t_estoque (id_produto, pos_x, pos_y, quantidade, local)
+                VALUES (?, ?, ?, ?, ?)
+            """, (id_produto, pos_x, pos_y, quantidade, local_num))
             
             conexao.commit()
             return True
@@ -285,7 +284,7 @@ class EstoqueServiceImpl(EstoqueService):
         try:
             cursor = conexao.cursor()
             
-            cursor.execute("DELETE FROM t_estoque_armazem WHERE id = ?", (id_item,))
+            cursor.execute("DELETE FROM t_estoque WHERE id = ?", (id_item,))
             
             conexao.commit()
             return cursor.rowcount > 0

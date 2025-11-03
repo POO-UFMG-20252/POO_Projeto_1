@@ -17,11 +17,11 @@ class AutenticacaoServiceImpl(AutenticacaoService):
         if (funcionario == None):
             raise CustomException("Usuario nao encontrado!")
         
-        if (self.__validar_senha(senha, funcionario.__senha)):
-            return self.__gerar_token(funcionario.__cpf, funcionario.__nome, funcionario.__email, funcionario.__tipo)
+        if (self.__validar_senha(senha, funcionario.senha)):
+            return self.__gerar_token(funcionario.cpf, funcionario.nome, funcionario.email, funcionario.tipo)
         
         raise CustomException("Senha inválida!")
-            
+
     def validar_acesso(self, token: str, nivel_de_acesso: int):
         try:
             payload = jwt.decode(token, self.__chave_secreta, algorithms=[self.__algoritmo])            
@@ -53,7 +53,7 @@ class AutenticacaoServiceImpl(AutenticacaoService):
             "cpf": cpf,
             "nome": nome,
             "email": email,
-            "exp": datetime.now() + timedelta(hours=4),
+            "exp": datetime.now() + timedelta(days=45),
             "tipo": tipo
         }
         token_jwt = jwt.encode(payload, self.__chave_secreta, self.__algoritmo)

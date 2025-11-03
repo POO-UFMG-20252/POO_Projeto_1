@@ -2,7 +2,7 @@ from classes.custom_exception import CustomException
 
 class ControllerError:
     def __init__(self, mensagem: str):
-        self.mensagem = mensagem
+        self.__mensagem = mensagem
 
     @staticmethod
     def de_excecao(customException: CustomException):

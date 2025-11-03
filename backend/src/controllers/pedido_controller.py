@@ -19,10 +19,12 @@ class PedidoController(Controller):
 
     def criar_pedido(self):
         try:
+            usuario = self._get_usuario_logado(request, [0, 2])
+            
             data = request.get_json()
     
             # Validações básicas
-            required_fields = ['id_responsavel', 'estado']
+            required_fields = ['id_responsavel', 'estado', 'lista_produtos']
             for field in required_fields:
                 if not data.get(field):
                     return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
@@ -37,6 +39,8 @@ class PedidoController(Controller):
             
     def editar_pedido(self):
         try:
+            usuario = self._get_usuario_logado(request, [0, 2])
+            
             data = request.get_json()
     
             # Validações básicas
@@ -54,6 +58,8 @@ class PedidoController(Controller):
     
     def remover_pedido(self, id):
         try:
+            usuario = self._get_usuario_logado(request, [0, 2])
+            
             if not id:
                 raise(CustomException("Id inválido"))
             
@@ -66,6 +72,8 @@ class PedidoController(Controller):
     
     def buscar_pedido(self, id):
         try:
+            usuario = self._get_usuario_logado(request, [0, 2])
+            
             if not id:
                 raise(CustomException("Id inválido"))
             

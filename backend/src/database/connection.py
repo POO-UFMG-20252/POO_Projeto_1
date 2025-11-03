@@ -42,7 +42,6 @@ class DatabaseConnection:
         resultado = cursor.fetchone()
         
         if resultado['count'] == 0:
-            print("📝 Inserindo dados iniciais na tabela funcionarios...")
             # Inserir dados iniciais apenas se a tabela estiver vazia
             cursor.executescript("""
                 INSERT INTO "t_funcionario" (
@@ -54,7 +53,7 @@ class DatabaseConnection:
                     "data_admissao",
                     "salario", 
                     "tipo", 
-                    "ativo", 
+                    "ativo"
                 ) VALUES 
                 (
                     '12345678901', 
@@ -124,7 +123,6 @@ class DatabaseConnection:
                 );
             """)
             conexao.commit()
-            print("✅ Dados iniciais inseridos com sucesso!")
         
         # t_ponto - salva os dados de ponto dos usuarios
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_ponto" (
@@ -148,31 +146,16 @@ class DatabaseConnection:
                 PRIMARY KEY("id")
                 );""")
         
-        # t_estoque_mercado - salva os dados do estoque de um mercado
-        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_estoque_mercado" (
+        # t_estoque - salvaos dados do estoque
+        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_estoque" (
                 "id" INTEGER NOT NULL UNIQUE,
-                "id_mercado" INTEGER NOT NULL,
                 "id_produto" INTEGER NOT NULL,
-                "quantidade" INTEGER NOT NULL,
-                PRIMARY KEY("id"),
-                FOREIGN KEY ("id_produto") REFERENCES "t_produto"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION,
-                FOREIGN KEY ("id_mercado") REFERENCES "t_mercado"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION
-                );""")
-        
-        # t_estoque_armazem - salvaos dados do estoque de um armazem
-        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_estoque_armazem" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "id_mercado" INTEGER NOT NULL,
-                "id_produto" INTEGER NOT NULL,
+                "local" INTEGER NOT NULL,
                 "pos_x" INTEGER NOT NULL,
                 "pos_y" INTEGER NOT NULL,
                 "quantidade" INTEGER NOT NULL,
                 PRIMARY KEY("id"),
                 FOREIGN KEY ("id_produto") REFERENCES "t_produto"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION,
-                FOREIGN KEY ("id_mercado") REFERENCES "t_mercado"("id")
                 ON UPDATE NO ACTION ON DELETE NO ACTION
                 );""")
         
@@ -181,6 +164,7 @@ class DatabaseConnection:
                 "id" INTEGER NOT NULL UNIQUE,
                 "nome" VARCHAR NOT NULL,
                 "marca" VARCHAR NOT NULL,
+                "preco" FLOAT NOT NULL,
                 PRIMARY KEY("id")
                 );""")
                 
@@ -188,11 +172,8 @@ class DatabaseConnection:
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_pedido" (
                 "id" INTEGER NOT NULL UNIQUE,
                 "id_responsavel" VARCHAR NOT NULL,
-                "id_mercado" INTEGER NOT NULL,
                 "estado" INTEGER NOT NULL,
                 PRIMARY KEY("id"),
-                FOREIGN KEY ("id_mercado") REFERENCES "t_mercado"("id")
-                ON UPDATE NO ACTION ON DELETE NO ACTION,
                 FOREIGN KEY ("id_responsavel") REFERENCES "t_funcionario"("cpf")
                 ON UPDATE NO ACTION ON DELETE NO ACTION
                 );""")
@@ -220,14 +201,14 @@ class DatabaseConnection:
         
         #t_vendas - salva dados de vendas
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS t_vendas (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_produto INTEGER NOT NULL,
-        quantidade INTEGER NOT NULL,
-        data_venda DATETIME DEFAULT CURRENT_TIMESTAMP,
-        total REAL NOT NULL,
-        codigo_pix VARCHAR(50) UNIQUE,
-        FOREIGN KEY (id_produto) REFERENCES t_produto(id)
-        );""")
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_produto INTEGER NOT NULL,
+                quantidade INTEGER NOT NULL,
+                data_venda DATETIME DEFAULT CURRENT_TIMESTAMP,
+                total REAL NOT NULL,
+                codigo_pix VARCHAR(50) UNIQUE,
+                FOREIGN KEY (id_produto) REFERENCES t_produto(id)
+                );""")
         
         #t_vendas_produtos - salva os produtos do mercado que foram vendidos 
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_vendas_produtos" (

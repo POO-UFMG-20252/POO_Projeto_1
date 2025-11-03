@@ -9,15 +9,15 @@ class EstoqueService:
         pass
     
     @abstractmethod
-    def listar_estoque_armazem(self, id_mercado: int = 1) -> List[ItemEstoque]:
+    def listar_estoque_armazem(self) -> List[ItemEstoque]:
         pass
     
     @abstractmethod
-    def listar_estoque_loja(self, id_mercado: int = 1) -> List[ItemEstoque]:
+    def listar_estoque_loja(self) -> List[ItemEstoque]:
         pass
     
     @abstractmethod
-    def obter_visualizacao_estoque(self, id_mercado: int = 1) -> Dict[str, Any]:
+    def obter_visualizacao_estoque(self) -> Dict[str, Any]:
         pass
     
     @abstractmethod
@@ -25,8 +25,7 @@ class EstoqueService:
         pass
     
     @abstractmethod
-    def adicionar_produto(self, id_produto: int, id_mercado: int, pos_x: int, pos_y: int, 
-                         quantidade: int, local: str) -> bool:
+    def adicionar_produto(self, id_produto: int, pos_x: int, pos_y: int, quantidade: int, local: str) -> bool:
         pass
     
     @abstractmethod
