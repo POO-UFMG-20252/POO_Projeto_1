@@ -33,7 +33,6 @@ class DatabaseConnection:
             "salario" REAL NOT NULL DEFAULT 0,
             "tipo" INTEGER NOT NULL,
             "ativo" BOOLEAN NOT NULL DEFAULT 1,
-            "id_supervisor" INTEGER NOT NULL,
             "motivo_demissao" VARCHAR,
             PRIMARY KEY("cpf")
             );""")
@@ -56,7 +55,6 @@ class DatabaseConnection:
                     "salario", 
                     "tipo", 
                     "ativo", 
-                    "id_supervisor"
                 ) VALUES 
                 (
                     '12345678901', 
@@ -66,9 +64,8 @@ class DatabaseConnection:
                     '1985-03-15',
                     '2020-01-10',
                     3500.00, 
-                    1, 
-                    1, 
-                    0
+                    0, 
+                    1
                 ),
                 (
                     '23456789012', 
@@ -78,7 +75,6 @@ class DatabaseConnection:
                     '1990-07-22',
                     '2021-03-20',
                     4200.00, 
-                    1, 
                     1, 
                     1
                 ),
@@ -91,7 +87,6 @@ class DatabaseConnection:
                     '2019-08-05',
                     2800.00, 
                     2, 
-                    1, 
                     1
                 ),
                 (
@@ -102,7 +97,6 @@ class DatabaseConnection:
                     '1992-05-18',
                     '2022-02-14',
                     3800.00, 
-                    1, 
                     1, 
                     1
                 ),
@@ -115,7 +109,6 @@ class DatabaseConnection:
                     '2020-11-08',
                     3200.00, 
                     2, 
-                    1, 
                     1
                 ),
                 (
@@ -127,7 +120,6 @@ class DatabaseConnection:
                     '2023-01-30',
                     2900.00, 
                     2, 
-                    1, 
                     1
                 );
             """)

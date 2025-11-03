@@ -1,18 +1,20 @@
 from abc import abstractmethod
 
+from classes.pedido import Pedido
+
 class PedidoService:
     @abstractmethod
-    def criar_pedido(id: int, id_responsavel:int,id_mercado:int,estado:int):
+    def criar_pedido(id_responsavel:KeyboardInterrupt, estado:int) -> Pedido:
         pass
 
     @abstractmethod
-    def editar_pedido(id:int, estado:int):
+    def editar_pedido(id:int, estado:int) -> Pedido:
         pass
 
     @abstractmethod
-    def remover_pedido(id:int):
+    def remover_pedido(id:int) -> Pedido:
         pass
 
     @abstractmethod
-    def buscar_pedido(id : int):
+    def buscar_pedido(id : int) -> Pedido:
         pass

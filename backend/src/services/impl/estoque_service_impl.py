@@ -7,10 +7,10 @@ from typing import List, Dict, Any
 
 class EstoqueServiceImpl(EstoqueService):
     def __init__(self, database_connection: DatabaseConnection):
-        self.db_connection = database_connection
+        self.__banco_de_dados = database_connection
     
     def listar_produtos(self) -> List[Produto]:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
             
@@ -45,7 +45,7 @@ class EstoqueServiceImpl(EstoqueService):
         return self._listar_estoque_local(1, id_mercado)  # 1 = loja
     
     def _listar_estoque_local(self, local: int, id_mercado: int) -> List[ItemEstoque]:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
             
@@ -55,7 +55,7 @@ class EstoqueServiceImpl(EstoqueService):
             # Buscar todos os itens do local específico (0=armazém, 1=loja)
             cursor.execute("""
                 SELECT ea.id, ea.id_produto, ea.id_mercado, ea.pos_x, ea.pos_y, 
-                       ea.quantidade, ea.local, p.nome as produto_nome
+                        ea.quantidade, ea.local, p.nome as produto_nome
                 FROM t_estoque_armazem ea
                 JOIN t_produto p ON ea.id_produto = p.id
                 WHERE ea.id_mercado = ? AND ea.local = ?
@@ -185,7 +185,7 @@ class EstoqueServiceImpl(EstoqueService):
         return matriz
     
     def mover_produto(self, id_item: int, novo_pos_x: int, novo_pos_y: int, novo_local: str) -> bool:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
             
@@ -241,7 +241,7 @@ class EstoqueServiceImpl(EstoqueService):
     
     def adicionar_produto(self, id_produto: int, id_mercado: int, pos_x: int, pos_y: int, 
                          quantidade: int, local: str) -> bool:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
             
@@ -278,7 +278,7 @@ class EstoqueServiceImpl(EstoqueService):
                 conexao.close()
     
     def remover_produto(self, id_item: int) -> bool:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
             

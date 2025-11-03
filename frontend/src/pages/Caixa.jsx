@@ -34,7 +34,7 @@ const Caixa = () => {
                     throw new Error('Usuário não autenticado');
                 }
 
-                const response = await fetch(`http://localhost:5000/api/caixa/produtos/buscar?q=${encodeURIComponent(searchTerm)}`, {
+                const response = await fetch(`http://localhost:5000/api/produto/buscar?q=${encodeURIComponent(searchTerm)}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,

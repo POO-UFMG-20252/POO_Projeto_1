@@ -17,5 +17,5 @@ class FuncionarioService:
         pass
     
     @abstractmethod
-    def demitir(self, cpf_gerente: str, cpf_funcionario: str) -> Funcionario:
+    def demitir(self, cpf_funcionario: str) -> Funcionario:
         pass

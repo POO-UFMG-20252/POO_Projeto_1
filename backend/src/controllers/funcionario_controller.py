@@ -10,15 +10,18 @@ from classes.custom_exception import CustomException
 class FuncionarioController(Controller):
     def __init__(self, nome: str, funcionarioService: FuncionarioService, autenticacaoService: AutenticacaoService):
         super().__init__(nome, autenticacaoService)
-        self.funcionario_service = funcionarioService
+        self.__funcionario_service = funcionarioService
         
     def registrar_rotas(self, app):
         app.add_url_rule('/api/funcionarios', 'listar_funcionarios', self.listar_funcionarios, methods=['GET'])
         app.add_url_rule('/api/funcionarios', 'cadastrar_funcionario', self.cadastrar_funcionario, methods=['POST'])
+        app.add_url_rule('/api/funcionarios', 'demitir_funcionario', self.demitir_funcionario, methods=['PUT'])
         
     def listar_funcionarios(self):        
         try:            
-            funcionarios = self.funcionario_service.listar_funcionarios()
+            super()._get_usuario_logado(request, [0])
+            
+            funcionarios = self.__funcionario_service.listar_funcionarios()
             return jsonify([funcionario.to_dict() for funcionario in funcionarios])
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
@@ -28,6 +31,8 @@ class FuncionarioController(Controller):
         
     def cadastrar_funcionario(self):
         try:
+            super()._get_usuario_logado(request, [0])
+            
             data = request.get_json()
             
             # Validações básicas
@@ -37,7 +42,7 @@ class FuncionarioController(Controller):
                     return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
             
             # Chamar o service para cadastrar
-            funcionario = self.funcionario_service.cadastrar_funcionario(
+            funcionario = self.__funcionario_service.cadastrar_funcionario(
                 nome=data['nome'],
                 cpf=data['cpf'],
                 email=data['email'],
@@ -56,3 +61,22 @@ class FuncionarioController(Controller):
         except Exception as e:
             print(f"Erro inesperado no cadastro de funcionario: {e}")
             return jsonify(ControllerError('Erro inesperado ao cadastrar funcionário').to_dict()), 500
+        
+    def demitir_funcionario(self):
+        try:
+            super()._get_usuario_logado(request, [0])
+            
+            data = request.get_json()
+            
+            # Validações básicas
+            required_fields = ['cpf']
+            for field in required_fields:
+                if not data.get(field):
+                    return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
+            
+            return self.__funcionario_service.demitir(data.get('fields'))
+        except CustomException as e:
+            return jsonify(ControllerError.de_excecao(e).to_dict()), 400
+        except Exception as e:
+            print(f"Erro inesperado ao demitir funcionario: {e}")
+            return jsonify(ControllerError('Erro inesperado ao demitir funcionario').to_dict()), 500

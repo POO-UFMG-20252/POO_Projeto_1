@@ -1,18 +1,21 @@
 from flask import Blueprint, request, jsonify
+from services.autenticacao_service import AutenticacaoService
 from services.estoque_service import EstoqueService
 from classes.contoller_error import ControllerError
 from classes.custom_exception import CustomException
+from controllers.controller import Controller
 
-class EstoqueController:
-    def __init__(self, estoqueService: EstoqueService):
+class EstoqueController(Controller):
+    def __init__(self, nome: str, estoqueService: EstoqueService, autenticacaoService: AutenticacaoService):
+        super().__init__(nome, autenticacaoService)
         self.estoqueService = estoqueService
         
     def registrar_rotas(self, app):
         app.add_url_rule('/api/estoque/visualizacao', 'obter_visualizacao_estoque', self.obter_visualizacao_estoque, methods=['GET'])
         app.add_url_rule('/api/estoque/mover', 'mover_produto', self.mover_produto, methods=['POST'])
-        app.add_url_rule('/api/estoque/adicionar', 'adicionar_produto', self.adicionar_produto, methods=['POST'])
-        app.add_url_rule('/api/estoque/remover/<int:id_item>', 'remover_produto', self.remover_produto, methods=['DELETE'])
-        app.add_url_rule('/api/estoque/produtos', 'listar_produtos', self.listar_produtos, methods=['GET'])
+        app.add_url_rule('/api/estoque/adicionar', 'adicionar_produto_no_estoque', self.adicionar_produto_no_estoque, methods=['POST'])
+        app.add_url_rule('/api/estoque/remover/<int:id_item>', 'remover_produto_do_estoque', self.remover_produto_do_estoque, methods=['DELETE'])
+        app.add_url_rule('/api/estoque/produtos', 'listar_produtos_do_estoque', self.listar_produtos_do_estoque, methods=['GET'])
         
     def obter_visualizacao_estoque(self):
         try:
@@ -61,7 +64,7 @@ class EstoqueController:
             print(f"Erro ao mover produto: {e}")
             return jsonify(ControllerError('Erro inesperado ao mover produto').to_dict()), 500
     
-    def adicionar_produto(self):
+    def adicionar_produto_no_estoque(self):
         try:
             usuario = self.auth_utils.get_usuario_logado()
             if not usuario:
@@ -93,7 +96,7 @@ class EstoqueController:
             print(f"Erro ao adicionar produto: {e}")
             return jsonify(ControllerError('Erro inesperado ao adicionar produto').to_dict()), 500
     
-    def remover_produto(self, id_item):
+    def remover_produto_do_estoque(self, id_item):
         try:
             usuario = self.auth_utils.get_usuario_logado()
             if not usuario:
@@ -112,7 +115,7 @@ class EstoqueController:
             print(f"Erro ao remover produto: {e}")
             return jsonify(ControllerError('Erro inesperado ao remover produto').to_dict()), 500
     
-    def listar_produtos(self):
+    def listar_produtos_do_estoque(self):
         try:
             usuario = self.auth_utils.get_usuario_logado()
             if not usuario:

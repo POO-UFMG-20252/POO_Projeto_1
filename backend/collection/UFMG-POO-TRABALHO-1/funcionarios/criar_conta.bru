@@ -7,13 +7,17 @@ meta {
 post {
   url: http://localhost:5000/api/funcionarios
   body: json
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 body:json {
   {
     "nome":"Artur Teste",
-    "cpf":"153.691.906-31",
+    "cpf":"152.656.976-44",
     "email":"arturteste@teste.teste",
     "senha":"teste",
     "data_nascimento":"02/22/2003",

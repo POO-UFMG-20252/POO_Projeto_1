@@ -7,25 +7,25 @@ from services.funcionario_service import FuncionarioService
 
 class AutenticacaoServiceImpl(AutenticacaoService):
     def __init__(self, funcionario_service: FuncionarioService):
-        self.funcionario_service = funcionario_service
-        self.chave_secreta = "e-segredo"
-        self.algoritmo = "HS256"
+        self.__funcionario_service = funcionario_service
+        self.__chave_secreta = "e-segredo"
+        self.__algoritmo = "HS256"
     
     def login(self, cpf: str, senha: str):
-        funcionario = self.funcionario_service.buscar_funcionario(cpf)
+        funcionario = self.__funcionario_service.buscar_funcionario(cpf)
         
         if (funcionario == None):
             raise CustomException("Usuario nao encontrado!")
         
-        if (self.__validar_senha(senha, funcionario.senha)):
-            return self.__gerar_token(funcionario.cpf, funcionario.nome, funcionario.email, funcionario.tipo)
+        if (self.__validar_senha(senha, funcionario.__senha)):
+            return self.__gerar_token(funcionario.__cpf, funcionario.__nome, funcionario.__email, funcionario.__tipo)
         
         raise CustomException("Senha inválida!")
             
     def validar_acesso(self, token: str, nivel_de_acesso: int):
         try:
-            payload = jwt.decode(token, self.chave_secreta, algorithms=[self.algoritmo])            
-                    
+            payload = jwt.decode(token, self.__chave_secreta, algorithms=[self.__algoritmo])            
+
             if (payload["tipo"] in nivel_de_acesso):
                 return {
                     'cpf': payload.get('cpf'),
@@ -56,5 +56,5 @@ class AutenticacaoServiceImpl(AutenticacaoService):
             "exp": datetime.now() + timedelta(hours=4),
             "tipo": tipo
         }
-        token_jwt = jwt.encode(payload, self.chave_secreta, self.algoritmo)
+        token_jwt = jwt.encode(payload, self.__chave_secreta, self.__algoritmo)
         return token_jwt

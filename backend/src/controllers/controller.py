@@ -8,7 +8,7 @@ class Controller():
         self.nome = nome
         self.autenticacaoService = autenticacaoService
     
-    def get_usuario_logado(self, request: Request, nivel_de_acesso: int):
+    def _get_usuario_logado(self, request: Request, nivel_de_acesso: int):
         try:
             bearer_token = request.headers['Authorization']
             token = bearer_token.split("Bearer ")[1]

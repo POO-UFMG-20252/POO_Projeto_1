@@ -10,17 +10,17 @@ from services.impl.autenticacao_service_impl import AutenticacaoServiceImpl
 
 class FuncionarioServiceImpl(FuncionarioService):
     def __init__(self, database_connection: DatabaseConnection):
-        self.db_connection = database_connection
+        self.__banco_de_dados = database_connection
     
     def listar_funcionarios(self) -> List[Funcionario]:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
 
         try:
             cursor = conexao.cursor()
             cursor.execute("""
-                SELECT cpf, nome, data_admissao 
+                SELECT cpf, nome, data_admissao, tipo
                 FROM t_funcionario 
                 WHERE ativo = 1
                 ORDER BY nome
@@ -39,9 +39,8 @@ class FuncionarioServiceImpl(FuncionarioService):
                     senha="",  # valor padrão  
                     data_nascimento="",  # valor padrão
                     salario=0,  # valor padrão
-                    tipo=0,  # valor padrão
-                    ativo=True,  # valor padrão
-                    id_supervisor=0  # valor padrão
+                    tipo=resultado['tipo'],
+                    ativo=True  # valor padrão
                 )
                 funcionarios.append(funcionario)
                 
@@ -55,7 +54,7 @@ class FuncionarioServiceImpl(FuncionarioService):
                 conexao.close()
     
     def buscar_funcionario(self, cpf: str) -> Funcionario:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
             
@@ -63,7 +62,7 @@ class FuncionarioServiceImpl(FuncionarioService):
             cursor = conexao.cursor()
             cursor.execute("""
                 SELECT cpf, nome, email, senha, data_nascimento, 
-                    salario, tipo, ativo, id_supervisor, data_admissao
+                    salario, tipo, ativo, data_admissao
                 FROM t_funcionario 
                 WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?  AND ativo = 1
             """, (cpf,))
@@ -82,7 +81,6 @@ class FuncionarioServiceImpl(FuncionarioService):
                 salario=resultado['salario'],
                 tipo=resultado['tipo'],
                 ativo=bool(resultado['ativo']),
-                id_supervisor=resultado['id_supervisor'],
                 data_admissao=resultado['data_admissao']
             )
             
@@ -93,14 +91,29 @@ class FuncionarioServiceImpl(FuncionarioService):
             if conexao:
                 conexao.close()
     
-    def demitir(self, cpf_gerente: str, cpf_funcionario: str):
-        pass
+    def demitir(self, cpf_funcionario: str):      
+        try:
+            funcionario = self.buscar_funcionario(cpf_funcionario)
+
+            if not funcionario.ativo:
+                raise CustomException("Funcionario já foi demitido")
+
+            conexao = self.__banco_de_dados.get_connection()
+            cursor = conexao.cursor()
+            cursor.execute("UPDATE t_funcionario SET ativo = 0 WHERE id = ?",(cpf_funcionario,))
+            conexao.commit()
+            conexao.close()
+
+            return self.buscar_funcionario(cpf_funcionario)
+        except:
+            return CustomException("Erro inesperado ao demitir funcionario")
+
     
     def cadastrar_funcionario(self, nome: str, cpf: str, email: str, senha: str, data_nascimento: str, salario: float, tipo: str) -> Funcionario:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
-        
+
         try:
             cursor = conexao.cursor()
             
@@ -123,14 +136,12 @@ class FuncionarioServiceImpl(FuncionarioService):
                 raise CustomException("Tipo de funcionário inválido")
 
             senha_hash = AutenticacaoServiceImpl.gerar_hash_senha(senha)
-            print(senha)
-            print(senha_hash)
-
+            
             cursor.execute("""
                 INSERT INTO t_funcionario (
                     cpf, nome, senha, email, data_nascimento, data_admissao, 
-                    salario, tipo, ativo, id_supervisor
-                ) VALUES (?, ?, ?, ?, ?, date('now'), ?, ?, 1, 0)
+                    salario, tipo, ativo
+                ) VALUES (?, ?, ?, ?, ?, date('now'), ?, ?, 1)
             """, (cpf, nome, senha_hash, email, data_nascimento, float(salario), tipo_numero))
 
             conexao.commit()
@@ -138,7 +149,7 @@ class FuncionarioServiceImpl(FuncionarioService):
             # Buscar o funcionário recém-criado para retornar
             cursor.execute("""
                 SELECT cpf, nome, email, data_nascimento, data_admissao, 
-                    salario, tipo, ativo, id_supervisor
+                    salario, tipo, ativo
                 FROM t_funcionario 
                 WHERE cpf = ?
             """, (cpf,))
@@ -157,7 +168,6 @@ class FuncionarioServiceImpl(FuncionarioService):
                 salario=resultado['salario'],
                 tipo=resultado['tipo'],
                 ativo=bool(resultado['ativo']),
-                id_supervisor=resultado['id_supervisor'],
                 data_admissao=resultado['data_admissao']
             )
         

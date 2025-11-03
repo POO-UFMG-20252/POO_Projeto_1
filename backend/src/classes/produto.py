@@ -52,6 +52,15 @@ class Produto:
             'preco': self.preco
         }
     
+    @staticmethod
+    def from_dict(dict):
+        return Produto(
+            id=dict['id'],
+            nome=dict['nome'],
+            marca=dict['marca'],
+            preco=dict['preco']
+        )
+    
     def __str__(self):
         return f"Produto(id={self.id}, nome='{self.nome}', marca='{self.marca}', preco={self.preco})"
     

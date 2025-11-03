@@ -33,7 +33,7 @@ class AutenticacaoController(Controller):
         
     def get_usuario(self):
         try:
-            usuario = self.get_usuario_logado(request, [0, 1, 2])
+            usuario = self._get_usuario_logado(request, [0, 1, 2])
             
             if not usuario:
                 return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401

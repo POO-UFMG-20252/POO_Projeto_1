@@ -1,45 +1,19 @@
-from flask import Blueprint, request, jsonify
+from flask import request, jsonify
+from services.autenticacao_service import AutenticacaoService
+from controllers.controller import Controller
 from services.caixa_service import CaixaService
 from classes.contoller_error import ControllerError
 from classes.custom_exception import CustomException
-from utils.helpers import AuthUtils
 
-class CaixaController():
-    def __init__(self, caixaService: CaixaService):
+class CaixaController(Controller):
+    def __init__(self, nome: str, caixaService: CaixaService, autenticacaoService: AutenticacaoService):
+        super().__init__(nome, autenticacaoService)
         self.caixaService = caixaService
-        self.auth_utils = AuthUtils()
         
     def registrar_rotas(self, app):
-        app.add_url_rule('/api/caixa/produtos/buscar', 'buscar_produtos', self.buscar_produtos, methods=['GET'])
         app.add_url_rule('/api/caixa/venda/processar', 'processar_venda', self.processar_venda, methods=['POST'])
         app.add_url_rule('/api/caixa/produtos/<int:id_produto>', 'obter_produto', self.obter_produto, methods=['GET'])
-        
-    def buscar_produtos(self):
-        try:
-            usuario = self.auth_utils.get_usuario_logado()
-            if not usuario:
-                return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
             
-            termo = request.args.get('q', '')
-            
-            if not termo or len(termo.strip()) < 2:
-                return jsonify([])
-            
-            print(f"🔍 Buscando produtos com termo: '{termo}'")
-            produtos = self.caixaService.buscar_produtos_por_nome(termo.strip())
-            print(f"Encontrados {len(produtos)} produtos")
-            
-            return jsonify([produto.to_dict() for produto in produtos])
-            
-        except CustomException as e:
-            print(f"CustomException: {e}")
-            return jsonify(ControllerError.de_excecao(e).to_dict()), 400
-        except Exception as e:
-            print(f"Erro inesperado: {e}")
-            import traceback
-            traceback.print_exc()
-            return jsonify(ControllerError('Erro inesperado ao buscar produtos').to_dict()), 500
-    
     def processar_venda(self):
         try:
             usuario = self.auth_utils.get_usuario_logado()
@@ -68,9 +42,7 @@ class CaixaController():
                 if item['quantidade'] <= 0:
                     return jsonify(ControllerError('Quantidade deve ser maior que zero').to_dict()), 400
             
-            print(f"Processando venda com {len(itens_venda)} itens")
             resultado = self.caixaService.processar_venda(itens_venda, id_operador)
-            print(f"Venda processada com sucesso: {resultado}")
             
             return jsonify(resultado)
             

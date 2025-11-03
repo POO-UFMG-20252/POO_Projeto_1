@@ -9,47 +9,10 @@ import string
 
 class CaixaServiceImpl(CaixaService):
     def __init__(self, database_connection: DatabaseConnection):
-        self.db_connection = database_connection
-    
-    def buscar_produtos_por_nome(self, termo: str) -> List[Produto]:
-        conexao = self.db_connection.get_connection()
-        if not conexao:
-            raise CustomException("Erro ao conectar com o banco de dados")
-            
-        try:
-            cursor = conexao.cursor()
-            
-            # Buscar produtos que contenham o termo no nome OU na marca (case insensitive)
-            cursor.execute("""
-                SELECT id, nome, marca, preco 
-                FROM t_produto 
-                WHERE LOWER(nome) LIKE LOWER(?) OR LOWER(marca) LIKE LOWER(?)
-                LIMIT 10
-            """, (f'%{termo}%', f'%{termo}%'))
-            
-            resultados = cursor.fetchall()
-            produtos = []
-            
-            for resultado in resultados:
-                produto = Produto(
-                    id=resultado['id'],
-                    nome=resultado['nome'],
-                    marca=resultado['marca'],
-                    preco=resultado['preco'] or 0.0
-                )
-                produtos.append(produto)
-                
-            return produtos
-            
-        except Exception as e:
-            print(f"Erro ao buscar produtos: {e}")
-            raise CustomException("Erro ao buscar produtos")
-        finally:
-            if conexao:
-                conexao.close()
+        self.__banco_de_dados = database_connection
     
     def obter_produto_por_id(self, id_produto: int) -> Produto:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
             
@@ -89,7 +52,7 @@ class CaixaServiceImpl(CaixaService):
         return 'PIX' + ''.join(random.choices(caracteres, k=10))
     
     def processar_venda(self, itens_venda: List[Dict[str, Any]], id_operador: int) -> Dict[str, Any]:
-        conexao = self.db_connection.get_connection()
+        conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
             
@@ -108,8 +71,6 @@ class CaixaServiceImpl(CaixaService):
                 quantidade_vendida = item['quantidade']
                 total_item = item['preco'] * item['quantidade']
                 
-                print(f"🔍 Buscando estoque para produto {id_produto}, quantidade: {quantidade_vendida}")
-                
                 # Buscar itens em estoque ordenados por local (loja primeiro, depois armazém)
                 cursor.execute("""
                     SELECT id, quantidade, local 
@@ -122,9 +83,7 @@ class CaixaServiceImpl(CaixaService):
                 
                 if not itens_estoque:
                     raise CustomException(f"Produto '{item['nome']}' não encontrado em estoque")
-                
-                print(f"Itens em estoque encontrados: {len(itens_estoque)}")
-                
+                                
                 # Calcular estoque total disponível
                 estoque_total = sum(item['quantidade'] for item in itens_estoque)
                 if estoque_total < quantidade_vendida:
@@ -142,9 +101,7 @@ class CaixaServiceImpl(CaixaService):
                     local = item_estoque['local']
                     
                     quantidade_a_remover = min(quantidade_restante, quantidade_disponivel)
-                    
-                    print(f"🗑️ Removendo {quantidade_a_remover} unidades do item {id_item_estoque} (local: {local})")
-                    
+                                        
                     # Atualizar estoque
                     nova_quantidade = quantidade_disponivel - quantidade_a_remover
                     

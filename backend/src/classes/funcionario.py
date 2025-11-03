@@ -3,112 +3,103 @@ from datetime import date
 class Funcionario:
     def __init__(self, cpf: str, nome: str, data_admissao: str, 
                 email: str = "", senha: str = "", data_nascimento: str = "",
-                salario: float = 0, tipo: int = 0, ativo: bool = True, 
-                id_supervisor: int = 0):
-        self.cpf = cpf
-        self.nome = nome
-        self.data_admissao = data_admissao
-        self.email = email
-        self.senha = senha
-        self.data_nascimento = data_nascimento
-        self.salario = salario
-        self.tipo = tipo
-        self.ativo = ativo
-        self.id_supervisor = id_supervisor
+                salario: float = 0, tipo: int = 0, ativo: bool = True):
+        self.__cpf = cpf
+        self.__nome = nome
+        self.__data_admissao = data_admissao
+        self.__email = email
+        self.__senha = senha
+        self.__data_nascimento = data_nascimento
+        self.__salario = salario
+        self.__tipo = tipo
+        self.__ativo = ativo
 
     @property
     def cpf(self):
-        return self._cpf
+        return self.__cpf
 
     @cpf.setter
     def cpf(self, valor):
-        self._cpf = valor
+        self.__cpf = valor
 
     @property
     def nome(self):
-        return self._nome
+        return self.__nome
 
     @nome.setter
     def nome(self, valor):
-        self._nome = valor
+        self.__nome = valor
 
     @property
     def senha(self):
-        return self._senha
+        return self.__senha
 
     @senha.setter
     def senha(self, valor):
-        self._senha = valor
+        self.__senha = valor
 
     @property
     def email(self):
-        return self._email
+        return self.__email
 
     @email.setter
     def email(self, valor):
-        self._email = valor
+        self.__email = valor
 
     @property
     def data_nascimento(self):
-        return self._data_nascimento
+        return self.__data_nascimento
 
     @data_nascimento.setter
     def data_nascimento(self, valor):
-        self._data_nascimento = valor
+        self.__data_nascimento = valor
 
     @property
     def data_admissao(self):
-        return self._data_admissao
+        return self.__data_admissao
 
     @data_admissao.setter
     def data_admissao(self, valor):
-        self._data_admissao = valor
+        self.__data_admissao = valor
 
     @property
     def salario(self):
-        return self._salario
+        return self.__salario
 
     @salario.setter
     def salario(self, valor):
-        self._salario = valor
+        self.__salario = valor
 
     @property
     def tipo(self):
-        return self._tipo
+        return self.__tipo
     
     @tipo.setter
     def tipo(self, valor):
-        self._tipo = valor
+        self.__tipo = valor
 
     @property
     def ativo(self):
-        return self._ativo
+        return self.__ativo
 
     @ativo.setter
     def ativo(self, valor):
-        self._ativo = valor
-
-    @property
-    def id_supervisor(self):
-        return self._id_supervisor
-
-    @id_supervisor.setter
-    def id_supervisor(self, valor):
-        self._id_supervisor = valor
+        self.__ativo = valor
 
     @property
     def motivo_demissao(self):
-        return self._motivo_demissao
+        return self.__motivo_demissao
 
     @motivo_demissao.setter
     def motivo_demissao(self, valor):
-        self._motivo_demissao = valor
+        self.__motivo_demissao = valor
 
     def to_dict(self):
         return {
-            'cpf': self.cpf,
-            'nome': self.nome,
-            'data_admissao': self.data_admissao
+            'cpf': self.__cpf,
+            'nome': self.__nome,
+            'data_admissao': self.__data_admissao,
+            'tipo': self.__tipo
         }
     
     @classmethod
@@ -123,6 +114,5 @@ class Funcionario:
             data_nascimento=data.get('data_nascimento', ''),
             salario=data.get('salario', 0),
             tipo=data.get('tipo', 0),
-            ativo=data.get('ativo', True),
-            id_supervisor=data.get('id_supervisor', 0)
+            ativo=data.get('ativo', True)
         )

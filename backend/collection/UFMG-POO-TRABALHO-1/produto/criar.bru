@@ -5,9 +5,17 @@ meta {
 }
 
 post {
-  url: http://localhost:5000/api/pedido
-  body: none
+  url: http://localhost:5000/api/produto
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "nome": "",
+    "marca": "",
+    "preco": 10.50
+  }
 }
 
 settings {
