@@ -154,10 +154,11 @@ const CadastroFuncionario = () => {
         console.log('Enviando dados para API:', dadosParaAPI);
 
         // Fazer requisição para a API
-        const response = await fetch('http://localhost:5000/funcionarios', {
+        const response = await fetch('http://localhost:5000/api/funcionarios', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(dadosParaAPI)
         });

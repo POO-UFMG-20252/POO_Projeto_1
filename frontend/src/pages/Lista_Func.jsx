@@ -10,12 +10,18 @@ const EventosLista = () => {
             try {
                 setLoading(true);
                 setError(null);
+
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate('/login');
+                    return;
+                }
                 
-                const response = await fetch('http://localhost:5000/funcionarios', {
+                const response = await fetch('http://localhost:5000/api/funcionarios', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-
+                        'Authorization': `Bearer ${token}`
                     }
                 });
 
