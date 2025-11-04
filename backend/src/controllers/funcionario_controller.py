@@ -16,6 +16,7 @@ class FuncionarioController(Controller):
         app.add_url_rule('/api/funcionarios', 'listar_funcionarios', self.listar_funcionarios, methods=['GET'])
         app.add_url_rule('/api/funcionarios', 'cadastrar_funcionario', self.cadastrar_funcionario, methods=['POST'])
         app.add_url_rule('/api/funcionarios', 'demitir_funcionario', self.demitir_funcionario, methods=['PUT'])
+        app.add_url_rule('/api/funcionarios/ponto', 'bater_ponto', self.bater_ponto, methods=['POST'])
         
     def listar_funcionarios(self):        
         try:            
@@ -80,3 +81,36 @@ class FuncionarioController(Controller):
         except Exception as e:
             print(f"Erro inesperado ao demitir funcionario: {e}")
             return jsonify(ControllerError('Erro inesperado ao demitir funcionario').to_dict()), 500
+        
+    def bater_ponto(self):
+        try:
+            # Permitir que qualquer funcionário logado bata ponto (tipos 0, 1, 2)
+            usuario_logado = super()._get_usuario_logado(request, [0, 1, 2])
+            
+            data = request.get_json()
+            
+            # Validações básicas
+            required_fields = ['tipo']
+            for field in required_fields:
+                if not data.get(field) and data.get(field) != 0:
+                    return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
+            
+            tipo = data.get('tipo')
+            if tipo not in [0, 1]:
+                return jsonify(ControllerError('Tipo de ponto inválido (0=Entrada, 1=Saída)').to_dict()), 400
+            
+            # Usar CPF do usuário logado
+            cpf_funcionario = usuario_logado['cpf']
+            
+            resultado = self.__funcionario_service.bater_ponto(cpf_funcionario, tipo)
+            
+            return jsonify({
+                'message': resultado['mensagem'],
+                'ponto': resultado
+            }), 201
+            
+        except CustomException as e:
+            return jsonify(ControllerError.de_excecao(e).to_dict()), 400
+        except Exception as e:
+            print(f"Erro inesperado ao bater ponto: {e}")
+            return jsonify(ControllerError('Erro inesperado ao bater ponto').to_dict()), 500

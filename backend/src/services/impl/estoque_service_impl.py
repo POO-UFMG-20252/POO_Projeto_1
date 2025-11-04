@@ -118,7 +118,7 @@ class EstoqueServiceImpl(EstoqueService):
                         'linha': item.pos_x,
                         'coluna': item.pos_y,
                         'local': 'armazem',
-                        'itemId': item.id  # ← IMPORTANTE: incluir o ID do item
+                        'itemId': item.id  
                     }
             
             # Preencher matriz da loja
@@ -133,7 +133,7 @@ class EstoqueServiceImpl(EstoqueService):
                         'linha': item.pos_x,
                         'coluna': item.pos_y,
                         'local': 'loja',
-                        'itemId': item.id  # ← IMPORTANTE: incluir o ID do item
+                        'itemId': item.id 
                     }
             
             # Lista consolidada de produtos
@@ -178,7 +178,7 @@ class EstoqueServiceImpl(EstoqueService):
                     'linha': i,
                     'coluna': j,
                     'local': '',
-                    'itemId': None  # ← IMPORTANTE: incluir o ID do item
+                    'itemId': None  
                 })
             matriz.append(linha)
         return matriz

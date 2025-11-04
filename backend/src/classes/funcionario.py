@@ -100,7 +100,9 @@ class Funcionario:
             'cpf': self.__cpf,
             'nome': self.__nome,
             'data_admissao': self.__data_admissao,
-            'tipo': self.__tipo
+            'tipo': self.__tipo,
+            'ativo': self.ativo,
+            'salario': self.salario
         }
     
     @classmethod

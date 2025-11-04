@@ -1,6 +1,7 @@
 import bcrypt
 import sqlite3
 from typing import List
+from datetime import datetime
 
 from classes.funcionario import Funcionario
 from classes.custom_exception import CustomException
@@ -20,7 +21,7 @@ class FuncionarioServiceImpl(FuncionarioService):
         try:
             cursor = conexao.cursor()
             cursor.execute("""
-                SELECT cpf, nome, data_admissao, tipo
+                SELECT cpf, nome, data_admissao, tipo, ativo, salario
                 FROM t_funcionario 
                 WHERE ativo = 1
                 ORDER BY nome
@@ -38,9 +39,9 @@ class FuncionarioServiceImpl(FuncionarioService):
                     email="",  # valor padrão
                     senha="",  # valor padrão  
                     data_nascimento="",  # valor padrão
-                    salario=0,  # valor padrão
+                    salario=float(resultado['salario']),
                     tipo=resultado['tipo'],
-                    ativo=True  # valor padrão
+                    ativo=bool(resultado['ativo'])
                 )
                 funcionarios.append(funcionario)
                 
@@ -92,37 +93,78 @@ class FuncionarioServiceImpl(FuncionarioService):
                 conexao.close()
     
     def demitir(self, cpf_funcionario: str, motivo: str):      
+        conexao = None
         try:            
             conexao = self.__banco_de_dados.get_connection()
+            if not conexao:
+                raise CustomException("Erro ao conectar com o banco de dados")
+            
             cursor = conexao.cursor()
             
-            cursor.execute("""SELECT * FROM t_funcionario WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?""", (cpf_funcionario,))
+            # Usar transação explícita
+            cursor.execute("BEGIN TRANSACTION")
+            
+            try:
+                # Primeiro verificar se o funcionário existe e está ativo
+                cursor.execute("""
+                    SELECT * FROM t_funcionario 
+                    WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ? 
+                """, (cpf_funcionario,))
+                
+                resultado = cursor.fetchone()
+                
+                if not resultado:
+                    raise CustomException("Funcionário não encontrado")
+                    
+                if not resultado['ativo']:
+                    raise CustomException("Funcionário já foi demitido")
+                
+                # Fazer a atualização
+                cursor.execute("""
+                    UPDATE t_funcionario 
+                    SET ativo = 0, motivo_demissao = ? 
+                    WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?
+                """, (motivo, cpf_funcionario))
+                
+                # Commit da transação
+                cursor.execute("COMMIT")
+                
+            except Exception as e:
+                # Rollback em caso de erro
+                cursor.execute("ROLLBACK")
+                raise e
+            
+            # Buscar os dados atualizados (fora da transação)
+            cursor.execute("""
+                SELECT * FROM t_funcionario 
+                WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?
+            """, (cpf_funcionario,))
             
             resultado = cursor.fetchone()
             
-            if not resultado['ativo']:
-                raise CustomException("Funcionario já foi demitido")
-            
-            cursor.execute("UPDATE t_funcionario SET ativo = 0, motivo_demissao = ? WHERE cpf = ?",(motivo, cpf_funcionario,))
-            conexao.commit()
-            
-            cursor.execute("""SELECT * FROM t_funcionario WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?""", (cpf_funcionario,))
-            resultado = cursor.fetchone()
-            
-            conexao.close()
-
-            return  {
+            return {
                 'cpf': resultado['cpf'],
                 'nome': resultado['nome'],
                 'data_admissao': resultado['data_admissao'],
-                'tipo': resultado['tipo']
+                'tipo': resultado['tipo'],
+                'ativo': resultado['ativo']
             }
+            
         except CustomException as e:
             raise e
+        except sqlite3.OperationalError as e:
+            if "database is locked" in str(e):
+                raise CustomException("Sistema ocupado. Tente novamente em alguns segundos.")
+            else:
+                print(f"Erro de banco de dados ao demitir usuário: {e}")
+                raise CustomException("Erro de banco de dados ao demitir funcionário")
         except Exception as e:
-            print(f"Erro inesperado ao demitir usuário: {e}") 
-            raise CustomException("Erro inesperado ao demitir funcionario")
-
+            print(f"Erro inesperado ao demitir usuário: {e}")
+            raise CustomException("Erro inesperado ao demitir funcionário")
+        finally:
+            if conexao:
+                conexao.close()
+    
     
     def cadastrar_funcionario(self, nome: str, cpf: str, email: str, senha: str, data_nascimento: str, salario: float, tipo: str) -> Funcionario:
         conexao = self.__banco_de_dados.get_connection()
@@ -215,3 +257,92 @@ class FuncionarioServiceImpl(FuncionarioService):
         cursor.execute("SELECT cpf FROM t_funcionario WHERE email = ?", (email,))
         if cursor.fetchone():
             raise CustomException("Email já cadastrado")
+        
+    def bater_ponto(self, cpf_funcionario: str, tipo: int) -> dict:
+
+        conexao = self.__banco_de_dados.get_connection()
+        if not conexao:
+            raise CustomException("Erro ao conectar com o banco de dados")
+
+        try:
+            cursor = conexao.cursor()
+
+            # Limpar CPF
+            cpf_limpo = cpf_funcionario.replace('.', '').replace('-', '').replace(' ', '')
+            print(f"Buscando funcionário com CPF: {cpf_limpo}")
+
+            # Verificar se funcionário existe e está ativo
+            cursor.execute("""
+                SELECT cpf, nome, ativo FROM t_funcionario 
+                WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?
+            """, (cpf_limpo,))
+
+            funcionario = cursor.fetchone()
+
+            if not funcionario:
+                raise CustomException("Funcionário não encontrado")
+
+            if not funcionario['ativo']:
+                raise CustomException("Funcionário demitido não pode bater ponto")
+
+            print(f"Funcionário encontrado: {funcionario['nome']}")
+
+            # Verificar se já existe um ponto do mesmo tipo no mesmo dia
+            data_hoje = datetime.now().strftime('%Y-%m-%d')
+
+            cursor.execute("""
+                SELECT id FROM t_ponto 
+                WHERE id_usuario = ? 
+                AND DATE(horario) = ?
+                AND tipo = ?
+            """, (cpf_limpo, data_hoje, tipo))
+
+            ponto_existente = cursor.fetchone()
+
+            if ponto_existente:
+                tipo_texto = "entrada" if tipo == 0 else "saída"
+                raise CustomException(f"Ponto de {tipo_texto} já registrado hoje")
+
+            # Inserir o ponto
+            data_hora_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            print(f"Registrando ponto: {data_hora_atual}, tipo: {tipo}")
+
+            cursor.execute("""
+                INSERT INTO t_ponto (id_usuario, horario, tipo)
+                VALUES (?, ?, ?)
+            """, (cpf_limpo, data_hora_atual, tipo))
+
+            conexao.commit()
+            print("Ponto inserido no banco")
+
+            # Buscar dados do ponto registrado
+            cursor.execute("""
+                SELECT p.id, p.id_usuario, p.horario, p.tipo, f.nome
+                FROM t_ponto p
+                JOIN t_funcionario f ON p.id_usuario = f.cpf
+                WHERE p.id = last_insert_rowid()
+            """)
+
+            ponto = cursor.fetchone()
+
+            return {
+                'id': ponto['id'],
+                'id_usuario': ponto['id_usuario'],
+                'nome': ponto['nome'],
+                'horario': ponto['horario'],
+                'tipo': ponto['tipo'],
+                'tipo_descricao': 'Entrada' if ponto['tipo'] == 0 else 'Saída',
+                'mensagem': f"Ponto de {'entrada' if ponto['tipo'] == 0 else 'saída'} registrado com sucesso"
+            }
+
+        except CustomException as e:
+            print(f"CustomException no serviço: {e}")
+            raise e
+        except Exception as e:
+            print(f"Erro inesperado ao bater ponto no serviço: {e}")
+            import traceback
+            traceback.print_exc()
+            raise CustomException("Erro ao registrar ponto")
+        finally:
+            if conexao:
+                conexao.close()

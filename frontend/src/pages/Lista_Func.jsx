@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importe o useNavigate
 
 const EventosLista = () => {
     const [funcionarios, setFuncionarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate(); // Hook para navegação
 
     useEffect(() => {
         const carregarFuncionarios = async () => {
@@ -41,19 +43,25 @@ const EventosLista = () => {
         };
 
         carregarFuncionarios();
-    }, []);
+    }, [navigate]); // Adicione navigate como dependência
 
     const goBack = () => {
         window.history.back();
     };
 
     const redirecionar = () => {
-        // Lógica de redirecionamento
         console.log('Redirecionando...');
     };
 
     const irParaCadastro = () => {
-        window.location.href = '/cadastro_func';
+        navigate('/cadastro_func');
+    };
+
+    // Função para redirecionar para os detalhes do funcionário
+    const verDetalhesFuncionario = (funcionario) => {
+        navigate('/lista_gerente', { 
+            state: { funcionario } // Passa os dados do funcionário como state
+        });
     };
 
     // Função para formatar a data no formato brasileiro
@@ -187,7 +195,12 @@ const EventosLista = () => {
                                             </thead>
                                             <tbody>
                                                 {funcionarios.map((funcionario) => (
-                                                    <tr key={funcionario.cpf} className="trtabela">
+                                                    <tr 
+                                                        key={funcionario.cpf} 
+                                                        className="trtabela"
+                                                        onClick={() => verDetalhesFuncionario(funcionario)}
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
                                                         <td>{funcionario.cpf}</td>
                                                         <td>{funcionario.nome}</td>
                                                         <td>{formatarData(funcionario.data_admissao)}</td>

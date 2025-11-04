@@ -19,3 +19,7 @@ class FuncionarioService:
     @abstractmethod
     def demitir(self, cpf_funcionario: str, motivo: str) -> Funcionario:
         pass
+    
+    @abstractmethod
+    def bater_ponto(self, cpf_funcionario: str, tipo: int) -> dict:
+        pass
