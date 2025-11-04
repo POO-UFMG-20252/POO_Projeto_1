@@ -77,7 +77,7 @@ const Navbar = () => {
           { path: "/estoque", icon: "📦", label: "Estoque" },
           { path: "/funcionarios", icon: "👥", label: "Funcionários" },
           { path: "/lista_pedidos", icon: "📋", label: "Pedidos" },
-          { path: "/vendas", icon: "💰", label: "Vendas" },
+          { path: "/caixa", icon: "💰", label: "Caixa" },
           { path: "/produtos", icon: "🏷️", label: "Produtos" }
         ];
       
@@ -89,8 +89,8 @@ const Navbar = () => {
       
       case 2: // Caixa
         return [
-          { path: "/caixa", icon: "💰", label: "Caixa" },
-          { path: "/vendas", icon: "📊", label: "Vendas" }
+          { path: "/caixa", icon: "💰", label: "Caixa" }
+         // { path: "/vendas", icon: "📊", label: "Vendas" }
         ];
       
       default:

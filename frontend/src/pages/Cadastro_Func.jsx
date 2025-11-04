@@ -80,6 +80,13 @@ const CadastroFuncionario = () => {
       newErrors.tipoFuncionario = 'Tipo de funcionário é obrigatório';
     }
 
+    if (!formData.senha.trim()) {
+      newErrors.senha = 'Senha é obrigatória';
+    } else if (formData.senha.trim().length < 6) {
+      newErrors.senha = 'Senha deve ter pelo menos 6 caracteres';
+    }
+
+
     return newErrors;
   };
 
@@ -148,10 +155,16 @@ const CadastroFuncionario = () => {
           email: formData.email.trim(),
           data_nascimento: formData.dataNascimento,
           salario: parseFloat(formData.salario),
-          tipo: formData.tipoFuncionario
+          tipo: formData.tipoFuncionario,
+          senha: formData.senha
         };
 
         console.log('Enviando dados para API:', dadosParaAPI);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Usuário não autenticado');
+        }
 
         // Fazer requisição para a API
         const response = await fetch('http://localhost:5000/api/funcionarios', {
@@ -179,7 +192,8 @@ const CadastroFuncionario = () => {
             email: '',
             dataNascimento: '',
             salario: '',
-            tipoFuncionario: ''
+            tipoFuncionario: '',
+            senha: ''
           });
           setSubmitted(false);
         }, 3000);
@@ -315,6 +329,22 @@ const CadastroFuncionario = () => {
             </select>
             {errors.tipoFuncionario && <span className="error-message">{errors.tipoFuncionario}</span>}
           </div>
+
+          <div className="form-group">
+            <label htmlFor="senha">Senha *</label>
+            <input
+              type="password"
+              id="senha"
+              name="senha"
+              value={formData.senha}
+              onChange={handleChange}
+              className={errors.senha ? 'error' : ''}
+              placeholder="Digite a senha"
+              disabled={loading}
+            />
+            {errors.senha && <span className="error-message">{errors.senha}</span>}
+          </div>
+
         </div>
 
         <div className="form-actions">

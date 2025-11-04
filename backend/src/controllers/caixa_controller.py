@@ -15,9 +15,8 @@ class CaixaController(Controller):
     
     def processar_venda(self):
         try:
-            usuario = super()._get_usuario_logado(request, [0, 1])
+            usuario = super()._get_usuario_logado(request, [0, 2])
 
-            usuario = self.auth_utils.get_usuario_logado()
             if not usuario:
                 return jsonify(ControllerError('Usuário não autenticado').to_dict()), 401
             

@@ -16,7 +16,7 @@ class DatabaseConnection:
             conn.row_factory = sqlite3.Row
             return conn
         except sqlite3.Error as e:
-            print(f"❌ Erro ao conectar com o banco: {e}")
+            print(f"Erro ao conectar com o banco: {e}")
             return None
             
     def _configurar_tabelas(self, conexao: sqlite3.Connection):
@@ -57,9 +57,9 @@ class DatabaseConnection:
                 ) VALUES 
                 (
                     '12345678901', 
-                    'João Silva', 
+                    'Gerente da Silva', 
                     '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
-                    'joao.silva@empresa.com', 
+                    'gerente.silva@empresa.com', 
                     '1985-03-15',
                     '2020-01-10',
                     3500.00, 
@@ -67,10 +67,10 @@ class DatabaseConnection:
                     1
                 ),
                 (
-                    '23456789012', 
-                    'Maria Santos', 
+                    '12345678902', 
+                    'Repositor Pedrosa', 
                     '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
-                    'maria.santos@empresa.com', 
+                    'caixa.santos@empresa.com', 
                     '1990-07-22',
                     '2021-03-20',
                     4200.00, 
@@ -78,46 +78,13 @@ class DatabaseConnection:
                     1
                 ),
                 (
-                    '34567890123', 
-                    'Pedro Oliveira', 
+                    '12345678903', 
+                    'Caixa de Oliveira', 
                     '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
-                    'pedro.oliveira@empresa.com', 
+                    'repositor.oliveira@empresa.com', 
                     '1988-11-30',
                     '2019-08-05',
                     2800.00, 
-                    2, 
-                    1
-                ),
-                (
-                    '45678901234', 
-                    'Ana Costa', 
-                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
-                    'ana.costa@empresa.com', 
-                    '1992-05-18',
-                    '2022-02-14',
-                    3800.00, 
-                    1, 
-                    1
-                ),
-                (
-                    '56789012345', 
-                    'Carlos Lima', 
-                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
-                    'carlos.lima@empresa.com', 
-                    '1987-12-03',
-                    '2020-11-08',
-                    3200.00, 
-                    2, 
-                    1
-                ),
-                (
-                    '67890123456', 
-                    'Juliana Pereira', 
-                    '$2a$12$wQ8pOp2FnBS71EUj2loNq.vHNLOfUZFg7DuI05.97yBbnT.tWZEWu',
-                    'juliana.pereira@empresa.com', 
-                    '1991-09-25',
-                    '2023-01-30',
-                    2900.00, 
                     2, 
                     1
                 );
@@ -146,6 +113,35 @@ class DatabaseConnection:
                 PRIMARY KEY("id")
                 );""")
         
+        # t_produto - salva os dados de um produto
+        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_produto" (
+                "id" INTEGER NOT NULL UNIQUE,
+                "nome" VARCHAR NOT NULL,
+                "marca" VARCHAR NOT NULL,
+                "preco" FLOAT NOT NULL,
+                PRIMARY KEY("id")
+                );""")
+        
+        cursor.execute("SELECT COUNT(*) as count FROM t_produto")
+        resultado = cursor.fetchone()
+        
+        if resultado['count'] == 0:
+            cursor.executescript("""
+                INSERT INTO "t_produto" ("id", "marca", "nome", "preco") VALUES
+                    (1, 'Sadia', 'Peito de Frango', 18.90),
+                    (2, 'Seara', 'Linguiça Calabresa', 12.50),
+                    (3, 'Perdigão', 'Coxa e Sobrecoxa', 15.75),
+                    (4, 'Sadia', 'Carne Moída', 24.90),
+                    (5, 'Friboi', 'Picanha', 89.90),
+                    (6, 'Seara', 'Filé de Frango', 22.40),
+                    (7, 'Perdigão', 'Nuggets', 16.80),
+                    (8, 'Sadia', 'Salsicha', 8.90),
+                    (9, 'Friboi', 'Alcatra', 45.50),
+                    (10, 'Seara', 'Hambúrguer Bovino', 19.90),
+                    (11, 'Perdigão', 'Linguiça de Frango', 11.25),
+                    (12, 'Sadia', 'Bacon', 14.30);
+                """)
+            
         # t_estoque - salvaos dados do estoque
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_estoque" (
                 "id" INTEGER NOT NULL UNIQUE,
@@ -159,14 +155,25 @@ class DatabaseConnection:
                 ON UPDATE NO ACTION ON DELETE NO ACTION
                 );""")
         
-        # t_produto - salva os dados de um produto
-        conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_produto" (
-                "id" INTEGER NOT NULL UNIQUE,
-                "nome" VARCHAR NOT NULL,
-                "marca" VARCHAR NOT NULL,
-                "preco" FLOAT NOT NULL,
-                PRIMARY KEY("id")
-                );""")
+        cursor.execute("SELECT COUNT(*) as count FROM t_estoque")
+        resultado = cursor.fetchone()
+        
+        if resultado['count'] == 0:
+            cursor.executescript("""
+                INSERT INTO "t_estoque" ("id", "id_produto", "pos_x", "pos_y", "quantidade", "local") VALUES
+                    (1, 1, 1, 1, 50, 0),
+                    (2, 2, 1, 2, 30, 1),
+                    (3, 3, 1, 3, 25, 0),
+                    (4, 4, 1, 4, 40, 0),
+                    (5, 5, 2, 1, 20, 0),
+                    (6, 6, 2, 2, 35, 0),
+                    (7, 7, 2, 3, 15, 0),
+                    (8, 8, 2, 4, 60, 0),
+                    (9, 9, 3, 1, 45, 0),
+                    (10, 10, 3, 2, 28, 0),
+                    (11, 11, 3, 3, 32, 0),
+                    (12, 12, 3, 4, 18, 0);
+                """)
                 
         # t_pedido - salva os dados de um pedido
         conexao.cursor().execute("""CREATE TABLE IF NOT EXISTS "t_pedido" (

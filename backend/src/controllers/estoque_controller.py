@@ -19,7 +19,7 @@ class EstoqueController(Controller):
         
     def obter_visualizacao_estoque(self):
         try:
-            usuario = super()._get_usuario_logado(request, [0, 2])
+            usuario = super()._get_usuario_logado(request, [0, 1, 2])
             
             dados_estoque = self.estoqueService.obter_visualizacao_estoque()
             return jsonify(dados_estoque)
@@ -33,7 +33,7 @@ class EstoqueController(Controller):
     
     def mover_produto(self):
         try:
-            usuario = super()._get_usuario_logado(request, [0, 2])      
+            usuario = super()._get_usuario_logado(request, [0, 1, 2])      
 
             data = request.get_json()
             required_fields = ['id_item', 'novo_pos_x', 'novo_pos_y', 'novo_local']
@@ -60,7 +60,7 @@ class EstoqueController(Controller):
     
     def adicionar_produto_no_estoque(self):
         try:
-            usuario = super()._get_usuario_logado(request, [0, 2])
+            usuario = super()._get_usuario_logado(request, [0, 1, 2])
             
             data = request.get_json()
             required_fields = ['id_produto', 'pos_x', 'pos_y', 'quantidade', 'local']
@@ -88,7 +88,7 @@ class EstoqueController(Controller):
     
     def remover_produto_do_estoque(self, id_item):
         try:
-            usuario = super()._get_usuario_logado(request, [0, 2])            
+            usuario = super()._get_usuario_logado(request, [0, 1, 2])            
             
             sucesso = self.estoqueService.remover_produto(id_item)
             
@@ -104,7 +104,7 @@ class EstoqueController(Controller):
     
     def listar_produtos_do_estoque(self):
         try:
-            usuario = super()._get_usuario_logado(request, [0, 2])
+            usuario = super()._get_usuario_logado(request, [0, 1, 2])
             
             produtos = self.estoqueService.listar_produtos()
             return jsonify([produto.to_dict() for produto in produtos])

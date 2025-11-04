@@ -19,7 +19,7 @@ class PedidoController(Controller):
 
     def criar_pedido(self):
         try:
-            usuario = self._get_usuario_logado(request, [0, 2])
+            usuario = self._get_usuario_logado(request, [0, 1])
             
             data = request.get_json()
     
@@ -39,7 +39,7 @@ class PedidoController(Controller):
             
     def editar_pedido(self):
         try:
-            usuario = self._get_usuario_logado(request, [0, 2])
+            usuario = self._get_usuario_logado(request, [0, 1])
             
             data = request.get_json()
     
@@ -58,7 +58,7 @@ class PedidoController(Controller):
     
     def remover_pedido(self, id):
         try:
-            usuario = self._get_usuario_logado(request, [0, 2])
+            usuario = self._get_usuario_logado(request, [0, 1])
             
             if not id:
                 raise(CustomException("Id inválido"))
@@ -72,7 +72,7 @@ class PedidoController(Controller):
     
     def buscar_pedido(self, id):
         try:
-            usuario = self._get_usuario_logado(request, [0, 2])
+            usuario = self._get_usuario_logado(request, [0, 1])
             
             if not id:
                 raise(CustomException("Id inválido"))

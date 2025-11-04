@@ -239,7 +239,7 @@ class EstoqueServiceImpl(EstoqueService):
                 conexao.close()
     
     def adicionar_produto(self, id_produto: int, pos_x: int, pos_y: int, 
-                         quantidade: int, local: str) -> bool:
+                        quantidade: int, local: str) -> bool:
         conexao = self.__banco_de_dados.get_connection()
         if not conexao:
             raise CustomException("Erro ao conectar com o banco de dados")
