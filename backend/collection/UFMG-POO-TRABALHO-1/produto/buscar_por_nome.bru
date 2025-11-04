@@ -1,13 +1,17 @@
 meta {
-  name: buscar por id
+  name: buscar_por_nome
   type: http
-  seq: 1
+  seq: 5
 }
 
 get {
-  url: http://localhost:5000/api/produto/2
+  url: http://localhost:5000/api/produto/buscar?q=para
   body: none
   auth: bearer
+}
+
+params:query {
+  q: para
 }
 
 auth:bearer {

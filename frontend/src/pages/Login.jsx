@@ -136,7 +136,6 @@ const Login = () => {
                     {loading ? 'Entrando...' : 'Login'}
                 </button>
                 {error && <p className="error-message">{error}</p>}
-                <span>Ainda não tem conta? <Link to="/register">Register</Link></span>
             </form>
 
             <style jsx>{`

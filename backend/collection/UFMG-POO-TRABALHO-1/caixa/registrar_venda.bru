@@ -1,0 +1,33 @@
+meta {
+  name: registrar_venda
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5000/api/caixa/venda/processar
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "itens": [
+      {
+        "id": 1,
+        "nome": "Peito de Frango",
+        "preco": 18.9,
+        "quantidade": 2
+      }
+    ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

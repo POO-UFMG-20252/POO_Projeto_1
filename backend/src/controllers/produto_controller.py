@@ -81,7 +81,7 @@ class ProdutoController(Controller):
             if not id:
                 raise(CustomException("Id inválido"))
             
-            jsonify(self.produto_service.remover_produto(id).to_dict()), 200
+            return jsonify(self.produto_service.remover_produto(id).to_dict()), 200
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:

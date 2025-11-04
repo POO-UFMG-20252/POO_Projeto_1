@@ -1,11 +1,11 @@
 meta {
-  name: criar
+  name: mover
   type: http
   seq: 2
 }
 
 post {
-  url: http://localhost:5000/api/produto
+  url: http://localhost:5000/api/estoque/mover
   body: json
   auth: bearer
 }
@@ -16,9 +16,10 @@ auth:bearer {
 
 body:json {
   {
-    "nome": "Parafuso",
-    "marca": "MetalForte",
-    "preco": 0.75
+    "id_item": 1,
+    "novo_pos_x": 1,
+    "novo_pos_y": 1,
+    "novo_local": "0"
   }
 }
 

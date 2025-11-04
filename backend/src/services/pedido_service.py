@@ -4,7 +4,7 @@ from classes.pedido import Pedido
 
 class PedidoService:
     @abstractmethod
-    def criar_pedido(self, id_responsavel: str, estado:int, lista_produtos: list[list[int]]) -> Pedido:
+    def adicionar_pedido(self, id_responsavel: str, estado:int, lista_produtos: list[list[int]]) -> Pedido:
         pass
 
     @abstractmethod

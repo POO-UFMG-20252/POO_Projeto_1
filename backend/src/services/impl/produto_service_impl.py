@@ -15,7 +15,9 @@ class ProdutoServiceImpl(ProdutoService):
         cursor.execute("INSERT INTO t_produto (nome,marca,preco) VALUES (?,?,?)", (nome,marca,preco))
         conexao_db.commit()
         
-        cursor.execute("SELECT * FROM t_produto WHERE nome = ?, marca = ?, preco = ?", (nome, marca, preco))
+        id = cursor.lastrowid
+        
+        cursor.execute("SELECT * FROM t_produto WHERE id = ?", (id,))
         produto = cursor.fetchone()
         conexao_db.close()
         return Produto.from_dict(produto)
@@ -24,11 +26,12 @@ class ProdutoServiceImpl(ProdutoService):
         conexao_db = self.__banco_de_dados.get_connection()
         cursor = conexao_db.cursor()
         
-        cursor.execute("SELECT id FROM t_produto WHERE id =?",(id,))
+        cursor.execute("SELECT * FROM t_produto WHERE id = ?",(id,))
         produto_preexistente = cursor.fetchone()
+        
         if not produto_preexistente:
             raise CustomException("Produto não encontrado")
-        
+                
         cursor.execute("DELETE FROM t_produto WHERE id =?",(id,))
         conexao_db.commit()
         conexao_db.close()
@@ -38,12 +41,13 @@ class ProdutoServiceImpl(ProdutoService):
     def editar_produto(self,id: int, nome:str, marca:str, preco: float):
         conexao_db = self.__banco_de_dados.get_connection()
         cursor = conexao_db.cursor()
-        cursor.execute("UPDATE t_produto SET nome = ? marca = ? preco = ? WHERE id = ?",(nome,marca, preco,id))
+        cursor.execute("UPDATE t_produto SET nome = ?, marca = ?, preco = ? WHERE id = ?",(nome,marca, preco,id))
         conexao_db.commit()
-        conexao_db.close()
         
-        cursor.execute("SELECT id FROM t_produto WHERE id =?",(id,))
+        cursor.execute("SELECT * FROM t_produto WHERE id =?",(id,))
         produto = cursor.fetchone()
+        
+        conexao_db.close()
         
         return Produto.from_dict(produto)
 
@@ -55,7 +59,7 @@ class ProdutoServiceImpl(ProdutoService):
         cursor.execute("SELECT * FROM t_produto")
         results = cursor.fetchall()#pega todos os produtos
         for result in results:
-            produto = Produto(*result)
+            produto = Produto.from_dict(result).to_dict()
             produtos.append(produto)#pega cada item do fetchall e salva como um objeto na lista produtos
         conexao_db.close()
         return produtos
@@ -65,7 +69,7 @@ class ProdutoServiceImpl(ProdutoService):
         cursor = conexao_db.cursor()
         cursor.execute("SELECT * FROM t_produto WHERE id =?",(id,))
         result = cursor.fetchone()
-        return Produto(*result)
+        return Produto.from_dict(result)
     
     def buscar_produtos_por_nome(self, termo: str):
         conexao = self.__banco_de_dados.get_connection()

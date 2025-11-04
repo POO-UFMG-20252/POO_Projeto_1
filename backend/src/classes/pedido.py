@@ -1,5 +1,5 @@
 class Pedido():
-    def __init__(self, id, id_responsavel, estado, produtos):
+    def __init__(self, id: int, id_responsavel: str, estado: int, produtos: list):
         self.__id = id
         self.__id_responsavel = id_responsavel
         self.__estado = estado
@@ -32,7 +32,15 @@ class Pedido():
     #getters e setters lista_produtos
     @property
     def lista_produtos(self):
-        return self.lista_produtos
-    @estado.setter
+        return self.__lista_produtos
+    @lista_produtos.setter
     def lista_produtos(self, lista_produtos):
         self.__lista_produtos = lista_produtos
+        
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "id_responsavel": self.id_responsavel,
+            "estado": self.estado,
+            "lista_produtos": self.lista_produtos
+        }

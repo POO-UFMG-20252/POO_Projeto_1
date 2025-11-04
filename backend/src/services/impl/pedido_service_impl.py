@@ -22,16 +22,14 @@ class PedidoServiceImpl(PedidoService):
                 raise CustomException("Erro ao buscar id do pedido criado")
 
             dados_para_inserir = []
-            for produto in lista_produtos:
-                id_produto = produto[0]
-                quantidade_produto = produto[1]
+            for id_produto, quantidade_produto in lista_produtos:
                 dados_para_inserir.append((id_produto, id_pedido, quantidade_produto))
 
             cursor.executemany(
                     "INSERT INTO t_pedido_produto (id_produto, id_pedido, quantidade) VALUES (?, ?, ?)", 
                     dados_para_inserir
                 )
-
+            
             conexao_db.commit()
             return self.buscar_pedido(id_pedido)
         except CustomException as e:
@@ -64,24 +62,24 @@ class PedidoServiceImpl(PedidoService):
                 conexao_db.close()
 
     def remover_pedido(self,id:int):
+        conexao_db = self.__banco_de_dados.get_connection()
+        if not conexao_db:
+            raise CustomException("Erro ao conectar com o banco de dados")
+        
         try:
-            conexao_db = self.__banco_de_dados.get_connection()
-            if not conexao_db:
-                raise CustomException("Erro ao conectar com o banco de dados")
-
             pedido = self.buscar_pedido(id)
             
             cursor = conexao_db.cursor()
-            cursor.execute("DELETE FROM t_produto WHERE id =?",(id,))
+            cursor.execute("DELETE FROM t_pedido WHERE id =?",(id,))
             cursor.execute("DELETE FROM t_pedido_produto WHERE id_pedido =?",(id,))
             conexao_db.commit()
 
             return pedido
         except CustomException as e:
-            raise e
+            raise CustomException("Pedido não encontrado")
         except Exception as e:
-            print(f"Erro ao cadastrar pedido: {e}")
-            raise CustomException("Erro ao cadastrar pedido")
+            print(f"Erro ao remover pedido: {e}")
+            raise CustomException("Erro ao remover pedido")
         finally:
             if conexao_db:
                 conexao_db.close()
@@ -96,28 +94,25 @@ class PedidoServiceImpl(PedidoService):
             cursor.execute("SELECT * FROM t_pedido WHERE id = ?",(id,))
             result = cursor.fetchone()
             pedido = Pedido(
-                result['id'],
-                result['id_responsavel'],
-                result['estado'],
-                []
+                id=result['id'],
+                id_responsavel=result['id_responsavel'],
+                estado=result['estado'],
+                produtos=[]
             )
             
             cursor.execute("SELECT * FROM t_pedido_produto WHERE id_pedido = ?", (id,))
             result = cursor.fetchall()
             
-            produtos = []
-            for produto in result:
-                tupla_produto = (produto['id_produto', 'quantidade'])
-                produtos.append(tupla_produto)
-            
-            pedido.lista_produtos = produtos
-            
+            pedido.lista_produtos = []
+            for produto in result:                
+                pedido.lista_produtos.append((produto['id_produto'], produto['quantidade']))
+                            
             return pedido
         except CustomException as e:
             raise e
         except Exception as e:
-            print(f"Erro ao cadastrar pedido: {e}")
-            raise CustomException("Erro ao cadastrar pedido")
+            print(f"Erro ao buscar pedido: {e}")
+            raise CustomException("Erro ao buscar pedido")
         finally:
             if conexao_db:
                 conexao_db.close()

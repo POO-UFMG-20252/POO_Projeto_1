@@ -1,11 +1,11 @@
 meta {
-  name: editar
+  name: demitir
   type: http
   seq: 3
 }
 
 put {
-  url: http://localhost:5000/api/produto
+  url: http://localhost:5000/api/funcionarios
   body: json
   auth: bearer
 }
@@ -16,10 +16,8 @@ auth:bearer {
 
 body:json {
   {
-    "id": 13,
-    "nome": "Parafuso Sextavado 1/4\" Inox",
-    "marca": "MetalForte",
-    "preco": 1.25
+    "cpf": "12345678902",
+    "motivo": "Justa causa"
   }
 }
 

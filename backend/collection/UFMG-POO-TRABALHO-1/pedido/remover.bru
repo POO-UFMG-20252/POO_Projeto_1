@@ -5,9 +5,13 @@ meta {
 }
 
 delete {
-  url: http://localhost:5000/api/pedido/3
+  url: http://localhost:5000/api/pedido/1
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 settings {

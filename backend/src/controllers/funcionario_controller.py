@@ -69,12 +69,12 @@ class FuncionarioController(Controller):
             data = request.get_json()
             
             # Validações básicas
-            required_fields = ['cpf']
+            required_fields = ['cpf', 'motivo']
             for field in required_fields:
                 if not data.get(field):
                     return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
             
-            return self.__funcionario_service.demitir(data.get('fields'))
+            return self.__funcionario_service.demitir(data.get('cpf'), data.get('motivo'))
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:

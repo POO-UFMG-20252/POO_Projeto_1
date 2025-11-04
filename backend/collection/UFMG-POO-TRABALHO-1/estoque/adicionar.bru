@@ -1,11 +1,11 @@
 meta {
-  name: criar
+  name: adicionar
   type: http
   seq: 3
 }
 
 post {
-  url: http://localhost:5000/api/pedido
+  url: http://localhost:5000/api/estoque/adicionar
   body: json
   auth: bearer
 }
@@ -16,12 +16,11 @@ auth:bearer {
 
 body:json {
   {
-    "id_responsavel": 12345678901,
-    "estado": "0",
-    "lista_produtos": [
-      [ 1, 200 ],
-      [ 2, 100 ]
-    ]
+    "id_produto": 1,
+    "pos_x": 0,
+    "pos_y": 0,
+    "quantidade": 150,
+    "local": "0"
   }
 }
 

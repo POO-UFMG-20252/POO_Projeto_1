@@ -5,9 +5,13 @@ meta {
 }
 
 delete {
-  url: http://localhost:5000/api/produto
+  url: http://localhost:5000/api/produto/13
   body: none
-  auth: inherit
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
 }
 
 settings {

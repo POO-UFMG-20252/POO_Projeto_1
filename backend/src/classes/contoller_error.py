@@ -9,4 +9,6 @@ class ControllerError:
         return ControllerError(customException.mensagem)
 
     def to_dict(self):
-        return vars(self)
+        return {
+            "mensagem": self.__mensagem
+        }

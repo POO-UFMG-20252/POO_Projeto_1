@@ -6,8 +6,19 @@ meta {
 
 put {
   url: http://localhost:5000/api/pedido
-  body: none
-  auth: inherit
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "id": 1,
+    "estado": 2
+  }
 }
 
 settings {

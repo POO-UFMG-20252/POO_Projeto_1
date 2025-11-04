@@ -29,8 +29,7 @@ class PedidoController(Controller):
                 if not data.get(field):
                     return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
             
-            self.__pedido_service.criar_pedido(data.get('id_responsavel'), data.get('estado'))
-        
+            return self.__pedido_service.adicionar_pedido(data.get('id_responsavel'), data.get('estado'), data.get('lista_produtos')).to_dict()        
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
@@ -49,7 +48,7 @@ class PedidoController(Controller):
                 if not data.get(field):
                     return jsonify(ControllerError(f'Campo {field} é obrigatório').to_dict()), 400
             
-            return self.__pedido_service.editar_pedido(data.get('id'), data.get('estado'))
+            return self.__pedido_service.editar_pedido(data.get('id'), data.get('estado')).to_dict()
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
@@ -63,7 +62,7 @@ class PedidoController(Controller):
             if not id:
                 raise(CustomException("Id inválido"))
             
-            return self.__pedido_service.remover_pedido(id)
+            return self.__pedido_service.remover_pedido(id).to_dict()
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:
@@ -77,7 +76,7 @@ class PedidoController(Controller):
             if not id:
                 raise(CustomException("Id inválido"))
             
-            return self.__pedido_service.buscar_pedido(id)
+            return self.__pedido_service.buscar_pedido(id).to_dict()
         except CustomException as e:
             return jsonify(ControllerError.de_excecao(e).to_dict()), 400
         except Exception as e:

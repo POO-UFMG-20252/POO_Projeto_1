@@ -71,7 +71,7 @@ class FuncionarioServiceImpl(FuncionarioService):
             
             if not resultado:
                 return None
-                
+
             return Funcionario(
                 cpf=resultado['cpf'],
                 nome=resultado['nome'],
@@ -91,22 +91,37 @@ class FuncionarioServiceImpl(FuncionarioService):
             if conexao:
                 conexao.close()
     
-    def demitir(self, cpf_funcionario: str):      
-        try:
-            funcionario = self.buscar_funcionario(cpf_funcionario)
-
-            if not funcionario.ativo:
-                raise CustomException("Funcionario já foi demitido")
-
+    def demitir(self, cpf_funcionario: str, motivo: str):      
+        try:            
             conexao = self.__banco_de_dados.get_connection()
             cursor = conexao.cursor()
-            cursor.execute("UPDATE t_funcionario SET ativo = 0 WHERE id = ?",(cpf_funcionario,))
+            
+            cursor.execute("""SELECT * FROM t_funcionario WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?""", (cpf_funcionario,))
+            
+            resultado = cursor.fetchone()
+            
+            if not resultado['ativo']:
+                raise CustomException("Funcionario já foi demitido")
+            
+            cursor.execute("UPDATE t_funcionario SET ativo = 0, motivo_demissao = ? WHERE cpf = ?",(motivo, cpf_funcionario,))
             conexao.commit()
+            
+            cursor.execute("""SELECT * FROM t_funcionario WHERE REPLACE(REPLACE(REPLACE(cpf, '.', ''), '-', ''), ' ', '') = ?""", (cpf_funcionario,))
+            resultado = cursor.fetchone()
+            
             conexao.close()
 
-            return self.buscar_funcionario(cpf_funcionario)
-        except:
-            return CustomException("Erro inesperado ao demitir funcionario")
+            return  {
+                'cpf': resultado['cpf'],
+                'nome': resultado['nome'],
+                'data_admissao': resultado['data_admissao'],
+                'tipo': resultado['tipo']
+            }
+        except CustomException as e:
+            raise e
+        except Exception as e:
+            print(f"Erro inesperado ao demitir usuário: {e}") 
+            raise CustomException("Erro inesperado ao demitir funcionario")
 
     
     def cadastrar_funcionario(self, nome: str, cpf: str, email: str, senha: str, data_nascimento: str, salario: float, tipo: str) -> Funcionario:
@@ -127,8 +142,8 @@ class FuncionarioServiceImpl(FuncionarioService):
             # Mapear tipo string para número
             tipo_map = {
                 'Gerente': 0,
-                'Caixa': 1,
-                'Repositor': 2
+                'Repositor': 1,
+                'Caixa': 2
             }
 
             tipo_numero = tipo_map.get(tipo)

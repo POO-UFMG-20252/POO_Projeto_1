@@ -3,7 +3,7 @@ from datetime import date
 class Funcionario:
     def __init__(self, cpf: str, nome: str, data_admissao: str, 
                 email: str = "", senha: str = "", data_nascimento: str = "",
-                salario: float = 0, tipo: int = 0, ativo: bool = True):
+                salario: float = 0, tipo: int = 0, ativo: bool = True, motivo_demissao: str = ""):
         self.__cpf = cpf
         self.__nome = nome
         self.__data_admissao = data_admissao
@@ -13,6 +13,7 @@ class Funcionario:
         self.__salario = salario
         self.__tipo = tipo
         self.__ativo = ativo
+        self.__motivo_demissao = motivo_demissao
 
     @property
     def cpf(self):
