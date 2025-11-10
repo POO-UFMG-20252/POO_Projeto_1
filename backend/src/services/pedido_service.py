@@ -1,5 +1,5 @@
 from abc import abstractmethod
-
+from typing import List
 from classes.pedido import Pedido
 
 class PedidoService:
@@ -17,4 +17,12 @@ class PedidoService:
 
     @abstractmethod
     def buscar_pedido(self, id : int) -> Pedido:
+        pass
+    
+    @abstractmethod
+    def listar_pedidos(self) -> List[Pedido]:
+        pass
+
+    @abstractmethod
+    def alterar_estado_pedido(self, id: int, novo_estado: int) -> Pedido:
         pass

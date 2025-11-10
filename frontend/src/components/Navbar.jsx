@@ -78,7 +78,6 @@ const Navbar = () => {
           { path: "/funcionarios", icon: "👥", label: "Funcionários" },
           { path: "/lista_pedidos", icon: "📋", label: "Pedidos" },
           { path: "/caixa", icon: "💰", label: "Caixa" },
-          { path: "/produtos", icon: "🏷️", label: "Produtos" }
         ];
       
       case 1: // Repositor

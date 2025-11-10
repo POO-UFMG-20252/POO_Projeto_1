@@ -8,6 +8,7 @@ import Ponto from "./pages/Ponto"
 import Pedido from "./pages/Pedido"
 import Estoque from "./pages/Estoque"
 import Teste from "./pages/Teste"
+import Status_Pedido from "./pages/Status_Pedido"
 import Lista_Func from "./pages/Lista_Func"
 import Lista_Pedidos from "./pages/Lista_Pedidos"
 import Cadastro_Func from "./pages/Cadastro_Func"
@@ -59,13 +60,17 @@ const router = createBrowserRouter([
                 path: "/lista_gerente",
                 element: <Lista_Gerente />,
             },
-                        {
+            {
                 path: "/lista_pedidos",
                 element: <Lista_Pedidos />,
             },
-                        {
+            {
                 path: "/cadastro_func",
                 element: <Cadastro_Func />,
+            },
+            {
+                path: "/pedido/:id",
+                element: <Status_Pedido />,
             },
             {
                 path: "/teste",
